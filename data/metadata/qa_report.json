@@ -1,0 +1,257 @@
+{
+  "aborted": false,
+  "structural_failure_count": 0,
+  "advisory_flag_count": 3,
+  "generated_at": "2026-09-15T16:09:21.434779+00:00",
+  "report_version": 1,
+  "count_semantics": "All counts are raw NEISS sample records, not national estimates.",
+  "results": [
+    {
+      "check_id": "years_processed",
+      "category": "structural",
+      "passed": true,
+      "detail": "20 year(s) processed",
+      "count": 20,
+      "examples": []
+    },
+    {
+      "check_id": "header_contract",
+      "category": "structural",
+      "passed": true,
+      "detail": "All years match the 25-column header contract",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "unique_case_ids_within_year",
+      "category": "structural",
+      "passed": true,
+      "detail": "No duplicate case_ids within any year",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "no_unparseable_rows",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every year's rows parsed and cast cleanly after rejoin",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "weights_positive",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every weight is positive and non-null",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "treatment_dates_in_file_year",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every treatment_date falls within its file's year",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "unique_case_ids_global",
+      "category": "structural",
+      "passed": true,
+      "detail": "No case_id duplicated across years",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "design_psu_covers_fact_cases",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every fact (year,stratum,psu) exists in design_psu",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "bridge_products_reference_fact",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every bridge case_id references a fact case, and every fact case has an in-scope bridge row",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "known_body_part_codes",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every observed body_part code exists in its dictionary",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "known_diagnosis_codes",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every observed diagnosis code exists in its dictionary",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "known_disposition_codes",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every observed disposition code exists in its dictionary",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "known_location_codes",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every observed location code exists in its dictionary",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "known_sex_codes",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every observed sex code exists in its dictionary",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "in_scope_product_mapping",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every in-scope bridge row maps to a tool/family; dim_product matches the taxonomy",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "ages_in_valid_domain",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every age_raw value is in {0} U [2,115] U [201,223]",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "secondary_fill_rate_by_era",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every year's Body_Part_2 fill rate matches its schema era",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "enrichment_one_row_per_case",
+      "category": "structural",
+      "passed": true,
+      "detail": "narrative_enrichment has exactly one row per fact_cases case_id (63425)",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "specific_codes_never_refined",
+      "category": "structural",
+      "passed": true,
+      "detail": "Every non-broad-code in-scope row keeps final_tool_id == tool_id, no refinement",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "rejoined_records",
+      "category": "advisory",
+      "passed": false,
+      "detail": "year 2010: 1 rejoined; year 2013: 1 rejoined; year 2017: 1 rejoined; year 2018: 1 rejoined; year 2019: 1 rejoined; year 2021: 2 rejoined; year 2023: 3 rejoined",
+      "count": 10,
+      "examples": []
+    },
+    {
+      "check_id": "cp1252_fallback_years",
+      "category": "advisory",
+      "passed": false,
+      "detail": "Years decoded via cp1252 fallback: [2008, 2009, 2017]",
+      "count": 3,
+      "examples": [
+        "2008",
+        "2009",
+        "2017"
+      ]
+    },
+    {
+      "check_id": "yoy_workshop_volume_within_40pct",
+      "category": "advisory",
+      "passed": true,
+      "detail": "No consecutive-year workshop volume swings exceed 40%",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "non_taxonomy_coproduct_codes",
+      "category": "advisory",
+      "passed": false,
+      "detail": "360 distinct non-taxonomy co-product code(s) observed",
+      "count": 360,
+      "examples": [
+        "1819(3445)",
+        "1607(754)",
+        "1876(421)",
+        "1647(409)",
+        "1807(407)",
+        "374(402)",
+        "1884(341)",
+        "4078(313)",
+        "4056(302)",
+        "896(213)"
+      ]
+    },
+    {
+      "check_id": "missing_narratives",
+      "category": "advisory",
+      "passed": true,
+      "detail": "Every case has a narrative",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "secondary_field_availability",
+      "category": "advisory",
+      "passed": true,
+      "detail": "year 2006: body_part_2=0.0%, diagnosis_2=0.0%, product_3=0.0%; year 2007: body_part_2=0.0%, diagnosis_2=0.0%, product_3=0.0%; year 2008: body_part_2=0.0%, diagnosis_2=0.0%, product_3=0.0%; year 2009: body_part_2=0.0%, diagnosis_2=0.0%, product_3=0.0%; year 2010: body_part_2=0.0%, diagnosis_2=0.0%, product_3=0.0%; year 2011: body_part_2=0.0%, diagnosis_2=0.0%, product_3=0.0%; year 2012: body_part_2=0.0%, diagnosis_2=0.0%, product_3=0.0%; year 2013: body_part_2=0.0%, diagnosis_2=0.0%, product_3=0.0%; year 2014: body_part_2=0.0%, diagnosis_2=0.0%, product_3=0.0%; year 2015: body_part_2=0.0%, diagnosis_2=0.0%, product_3=0.0%; year 2016: body_part_2=0.0%, diagnosis_2=0.0%, product_3=0.0%; year 2017: body_part_2=0.0%, diagnosis_2=0.0%, product_3=0.0%; year 2018: body_part_2=0.0%, diagnosis_2=0.0%, product_3=0.0%; year 2019: body_part_2=19.6%, diagnosis_2=19.6%, product_3=2.0%; year 2020: body_part_2=21.2%, diagnosis_2=21.2%, product_3=2.4%; year 2021: body_part_2=21.2%, diagnosis_2=21.2%, product_3=2.0%; year 2022: body_part_2=22.4%, diagnosis_2=22.4%, product_3=1.8%; year 2023: body_part_2=23.7%, diagnosis_2=23.7%, product_3=1.7%; year 2024: body_part_2=24.5%, diagnosis_2=24.5%, product_3=1.8%; year 2025: body_part_2=23.6%, diagnosis_2=23.6%, product_3=2.0%",
+      "count": 20,
+      "examples": []
+    },
+    {
+      "check_id": "workshop_case_volume_sanity",
+      "category": "advisory",
+      "passed": true,
+      "detail": "Every year's raw in-scope case count is within [1500, 6000]",
+      "count": 0,
+      "examples": []
+    },
+    {
+      "check_id": "classifier_coverage",
+      "category": "advisory",
+      "passed": true,
+      "detail": "63658/63658 in-scope rows classified (100.0%)",
+      "count": 63658,
+      "examples": []
+    },
+    {
+      "check_id": "broad_code_refinement_rate",
+      "category": "advisory",
+      "passed": true,
+      "detail": "1434/29969 in-scope broad-code rows refined (4.8%)",
+      "count": 29969,
+      "examples": []
+    },
+    {
+      "check_id": "aggregate_cells_omitted",
+      "category": "advisory",
+      "passed": true,
+      "detail": "0 cells omitted",
+      "count": 0,
+      "examples": []
+    }
+  ]
+}

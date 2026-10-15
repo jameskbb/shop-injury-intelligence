@@ -1,0 +1,293 @@
+{
+  "coverage": {
+    "in_scope_rows": 63658,
+    "classified_rows": 63658,
+    "rate": 1.0
+  },
+  "unknown_pct": {
+    "mechanism": 36.33740638549468,
+    "subtype": 89.93456838785968
+  },
+  "confidence_distribution": {
+    "deciles": [
+      20430,
+      0,
+      0,
+      0,
+      23,
+      0,
+      21280,
+      3341,
+      0,
+      18351
+    ],
+    "high_ge_0.80": 18351,
+    "mid": 24621,
+    "low_lt_0.50": 20453,
+    "total": 63425
+  },
+  "source_counts": {
+    "rules": 63425
+  },
+  "disagreements": {
+    "count": 314,
+    "examples": [
+      "100243367: assigned band_saw, narrative names table_saw",
+      "100312010: assigned grinder_power, narrative names angle_grinder",
+      "100407950: assigned grinder_power, narrative names angle_grinder",
+      "100541817: assigned jointer, narrative names planer",
+      "100550620: assigned grinder_power, narrative names bench_grinder",
+      "100556217: assigned grinder_power, narrative names angle_grinder",
+      "100640633: assigned grinder_power, narrative names angle_grinder",
+      "100734244: assigned grinder_manual, narrative names angle_grinder",
+      "100872307: assigned grinder_power, narrative names bench_grinder",
+      "100907620: assigned circular_saw, narrative names table_saw"
+    ]
+  },
+  "subtype_coverage": {
+    "809": {
+      "total": 1235,
+      "refined": 25,
+      "rate": 0.020242914979757085
+    },
+    "845": {
+      "total": 6770,
+      "refined": 83,
+      "rate": 0.012259970457902511
+    },
+    "847": {
+      "total": 4640,
+      "refined": 40,
+      "rate": 0.008620689655172414
+    },
+    "862": {
+      "total": 874,
+      "refined": 0,
+      "rate": 0.0
+    },
+    "870": {
+      "total": 1595,
+      "refined": 12,
+      "rate": 0.007523510971786834
+    },
+    "871": {
+      "total": 2000,
+      "refined": 24,
+      "rate": 0.012
+    },
+    "895": {
+      "total": 5466,
+      "refined": 1073,
+      "rate": 0.19630442736919138
+    },
+    "899": {
+      "total": 7389,
+      "refined": 177,
+      "rate": 0.02395452699959399
+    }
+  },
+  "per_field_accuracy": {
+    "holdout": {
+      "tool_subtype": 0.9927007299270073,
+      "final_tool_id": 0.9927007299270073,
+      "activity": 0.8248175182481752,
+      "primary_mechanism": 0.7007299270072993,
+      "maintenance_or_setup": 0.9927007299270073,
+      "ppe_mentioned": 0.9854014598540146,
+      "guard_mentioned": 1.0,
+      "maintenance_context": 0.9927007299270073,
+      "power_state_mentioned": 1.0
+    },
+    "all": {
+      "tool_subtype": 0.9943502824858758,
+      "final_tool_id": 0.9943502824858758,
+      "activity": 0.8305084745762712,
+      "primary_mechanism": 0.6440677966101694,
+      "maintenance_or_setup": 0.9830508474576272,
+      "ppe_mentioned": 0.9830508474576272,
+      "guard_mentioned": 1.0,
+      "maintenance_context": 0.9830508474576272,
+      "power_state_mentioned": 1.0
+    }
+  },
+  "per_class": {
+    "tool_subtype": {
+      "holdout": {
+        "angle_grinder": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 1
+        },
+        "chisel": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 7
+        },
+        "chop_saw_metal": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 2
+        },
+        "grinder_generic": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 10
+        },
+        "miter_saw": {
+          "precision": 1.0,
+          "recall": 0.9230769230769231,
+          "support": 13
+        },
+        "unknown": {
+          "precision": 0.9904761904761905,
+          "recall": 1.0,
+          "support": 104
+        }
+      },
+      "all": {
+        "angle_grinder": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 1
+        },
+        "chisel": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 7
+        },
+        "chop_saw_metal": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 2
+        },
+        "grinder_generic": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 12
+        },
+        "miter_saw": {
+          "precision": 1.0,
+          "recall": 0.9333333333333333,
+          "support": 15
+        },
+        "unknown": {
+          "precision": 0.9929078014184397,
+          "recall": 1.0,
+          "support": 140
+        }
+      }
+    },
+    "primary_mechanism": {
+      "holdout": {
+        "direct_cutting_contact": {
+          "precision": 0.8157894736842105,
+          "recall": 0.62,
+          "support": 50
+        },
+        "entanglement": {
+          "precision": 1.0,
+          "recall": 0.8333333333333334,
+          "support": 6
+        },
+        "fall_trip": {
+          "precision": 1.0,
+          "recall": 0.125,
+          "support": 8
+        },
+        "flying_debris_fb": {
+          "precision": 0.35714285714285715,
+          "recall": 1.0,
+          "support": 5
+        },
+        "kickback_ejection": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 15
+        },
+        "loss_of_tool_control": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 0
+        },
+        "maintenance_setup": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 1
+        },
+        "pinch_crush": {
+          "precision": 0.5,
+          "recall": 0.5,
+          "support": 2
+        },
+        "unknown": {
+          "precision": 0.6101694915254238,
+          "recall": 0.7659574468085106,
+          "support": 47
+        },
+        "workpiece_slip": {
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "support": 3
+        }
+      },
+      "all": {
+        "direct_cutting_contact": {
+          "precision": 0.782608695652174,
+          "recall": 0.5901639344262295,
+          "support": 61
+        },
+        "entanglement": {
+          "precision": 1.0,
+          "recall": 0.8571428571428571,
+          "support": 7
+        },
+        "fall_trip": {
+          "precision": 1.0,
+          "recall": 0.2,
+          "support": 10
+        },
+        "flying_debris_fb": {
+          "precision": 0.21739130434782608,
+          "recall": 0.8333333333333334,
+          "support": 6
+        },
+        "kickback_ejection": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 16
+        },
+        "loss_of_tool_control": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 0
+        },
+        "maintenance_setup": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 3
+        },
+        "pinch_crush": {
+          "precision": 0.5,
+          "recall": 0.25,
+          "support": 4
+        },
+        "unknown": {
+          "precision": 0.5822784810126582,
+          "recall": 0.6865671641791045,
+          "support": 67
+        },
+        "workpiece_slip": {
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "support": 3
+        }
+      }
+    }
+  },
+  "labeled": {
+    "all_n": 177,
+    "holdout_n": 137,
+    "dev_n": 40
+  },
+  "classifier_version": "rules-1.2.0"
+}

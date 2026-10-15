@@ -1,0 +1,88 @@
+# Body part codes (D-15). Transcribed verbatim from the NEISS Coding Manual, January 2025
+# (rev.1), page 24 ("Body Part 1 and 2" table). Body part 0 (Internal) is a real code, not a
+# missing/null sentinel -- see PITFALLS.md Pitfall 3.
+version: 1
+source:
+  document: "NEISS Coding Manual, January 2025 (rev.1)"
+  url: "https://www.cpsc.gov/s3fs-public/JANUARY-2025-NEISS-CPSC-only-Coding-Manual-Rev-1.pdf"
+  pages: "24-25"
+
+codes:
+  0:
+    label: "Internal (use with aspiration and ingestion)"
+    manual_page: 24
+  30:
+    label: "Shoulder (including clavicle, collarbone)"
+    manual_page: 24
+  31:
+    label: "Trunk, upper (not including shoulders)"
+    manual_page: 24
+  32:
+    label: "Elbow"
+    manual_page: 24
+  33:
+    label: "Arm, lower (not including elbow or wrist)"
+    manual_page: 24
+  34:
+    label: "Wrist"
+    manual_page: 24
+  35:
+    label: "Knee"
+    manual_page: 24
+  36:
+    label: "Leg, lower (not including knee or ankle)"
+    manual_page: 24
+  37:
+    label: "Ankle"
+    manual_page: 24
+  38:
+    label: "Pubic region"
+    manual_page: 24
+  75:
+    label: "Head"
+    manual_page: 24
+  76:
+    label: "Face (including eyelid, eye area and nose)"
+    manual_page: 24
+  77:
+    label: "Eyeball"
+    manual_page: 24
+  79:
+    label: "Trunk, lower"
+    manual_page: 24
+  80:
+    label: "Arm, upper"
+    manual_page: 24
+  81:
+    label: "Leg, upper"
+    manual_page: 24
+  82:
+    label: "Hand"
+    manual_page: 24
+  83:
+    label: "Foot"
+    manual_page: 24
+  84:
+    label: "25-50% of body (used for burns only)"
+    manual_page: 24
+  85:
+    label: "All parts of body (more than 50% of body)"
+    manual_page: 24
+  87:
+    label: "Not recorded"
+    manual_page: 24
+  88:
+    label: "Mouth (including lips, tongue and teeth)"
+    manual_page: 24
+  89:
+    label: "Neck"
+    manual_page: 24
+  92:
+    label: "Finger"
+    manual_page: 24
+  93:
+    label: "Toe"
+    manual_page: 24
+  94:
+    label: "Ear"
+    manual_page: 24

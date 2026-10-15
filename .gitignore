@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.duckdb
+
+data/raw/
+data/interim/
+data/reference/
+
+# Local working notes and assistant configuration: never part of the public tree.
+.gsd/
+.planning/
+.claude/

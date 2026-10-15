@@ -1,0 +1,53 @@
+# Disposition codes (D-15). Codes 3 and 7 do not exist (PITFALLS.md Pitfall 3). Transcribed
+# verbatim from the NEISS Coding Manual, January 2025 (rev.1), page 26. escalated_care is true
+# only for 2 (transferred) and 4 (admitted); observation (5) is reported separately per the
+# brief's explicit definition.
+version: 1
+source:
+  document: "NEISS Coding Manual, January 2025 (rev.1)"
+  url: "https://www.cpsc.gov/s3fs-public/JANUARY-2025-NEISS-CPSC-only-Coding-Manual-Rev-1.pdf"
+  pages: "26"
+
+codes:
+  1:
+    label: "Treated and released, or examined and released without treatment (also includes transfers for treatment to another department of the same facility without admission)"
+    manual_page: 26
+    severity_bucket: released
+    escalated_care: false
+    sort_order: 1
+  2:
+    label: "Treated and transferred to another hospital"
+    manual_page: 26
+    severity_bucket: escalated
+    escalated_care: true
+    sort_order: 2
+  4:
+    label: "Treated and admitted for hospitalization (within same facility)"
+    manual_page: 26
+    severity_bucket: escalated
+    escalated_care: true
+    sort_order: 3
+  5:
+    label: "Held for observation (includes admitted for observation)"
+    manual_page: 26
+    severity_bucket: observation
+    escalated_care: false
+    sort_order: 4
+  6:
+    label: "Left without being seen, Left against medical advice, Left without treatment, Eloped"
+    manual_page: 26
+    severity_bucket: left_without_treatment
+    escalated_care: false
+    sort_order: 5
+  8:
+    label: "Fatality, includes brain death, dead on arrival (\"DOA\"), died in the ED, and died after admission"
+    manual_page: 26
+    severity_bucket: fatality
+    escalated_care: false
+    sort_order: 6
+  9:
+    label: "Not recorded"
+    manual_page: 26
+    severity_bucket: not_recorded
+    escalated_care: false
+    sort_order: 7

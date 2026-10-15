@@ -1,0 +1,314 @@
+# Workshop tool product-code taxonomy (D-01, D-02, D-04, D-05).
+# Every in-scope code is validated against the January 2025 NEISS Product Code Comparability
+# Table (pages 27-30). Codes are stored WITHOUT a leading zero, matching the raw NEISS files.
+version: 1
+validated_against: "2025 Comparability Table"
+sources:
+  comparability_table:
+    url: "https://www.cpsc.gov/s3fs-public/2025-Comparability-Table-Final.pdf"
+    pages: "27-30"
+  coding_manual:
+    url: "https://www.cpsc.gov/s3fs-public/JANUARY-2025-NEISS-CPSC-only-Coding-Manual-Rev-1.pdf"
+
+families:
+  saws: {label: "Saws", sort_order: 1}
+  cutting_shaping: {label: "Cutting / Shaping", sort_order: 2}
+  abrasive: {label: "Abrasive", sort_order: 3}
+  drilling_fastening: {label: "Drilling / Fastening", sort_order: 4}
+  manual: {label: "Manual", sort_order: 5}
+
+tools:
+  table_saw: {label: "Bench or Table Saw", family: saws}
+  circular_saw: {label: "Portable Circular Power Saw", family: saws}
+  band_saw: {label: "Band Saw", family: saws}
+  radial_arm_saw: {label: "Radial Arm Saw", family: saws}
+  jigsaw: {label: "Jigsaw", family: saws}
+  reciprocating_saw: {label: "Reciprocating Saw (Sabre Saw)", family: saws}
+  other_power_saw: {label: "Other Power Saw", family: saws}
+  saw_unspecified: {label: "Saw, Not Specified", family: saws}
+  router: {label: "Router", family: cutting_shaping}
+  jointer: {label: "Jointer", family: cutting_shaping}
+  lathe: {label: "Lathe", family: cutting_shaping}
+  shaper: {label: "Shaper", family: cutting_shaping}
+  other_power_tool: {label: "Other Power Tool", family: cutting_shaping}
+  sander: {label: "Sander", family: abrasive}
+  grinder_power: {label: "Power Grinder", family: abrasive}
+  grinder_unspecified: {label: "Grinder, Not Specified", family: abrasive}
+  drill_portable: {label: "Portable Drill", family: drilling_fastening}
+  drill_press: {label: "Drill Press", family: drilling_fastening}
+  drill_power_unspecified: {label: "Power Drill, Not Specified", family: drilling_fastening}
+  drill_unspecified: {label: "Drill, Not Specified", family: drilling_fastening}
+  nail_gun: {label: "Nail Gun / Stud Driver", family: drilling_fastening}
+  hand_saw: {label: "Hand Saw", family: manual}
+  hacksaw: {label: "Hacksaw", family: manual}
+  chisel_plane: {label: "Chisel / Plane", family: manual}
+  manual_sanding: {label: "Manual Sanding Tool", family: manual}
+  grinder_manual: {label: "Manual Grinder", family: manual}
+  clamp_vise: {label: "Clamp / Vise", family: manual}
+
+codes:
+  841:
+    tool_id: table_saw
+    code_label: "0841"
+    official_name: "Bench or table saws"
+    start_year: 1974
+    comparability_note: "stable since 1974; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  832:
+    tool_id: circular_saw
+    code_label: "0832"
+    official_name: "Portable circular power saws"
+    start_year: 1972
+    comparability_note: "stable since 1972; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  842:
+    tool_id: band_saw
+    code_label: "0842"
+    official_name: "Band saws"
+    start_year: 1974
+    comparability_note: "stable since 1974; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  843:
+    tool_id: radial_arm_saw
+    code_label: "0843"
+    official_name: "Radial arm saws"
+    start_year: 1974
+    comparability_note: "stable since 1974; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  875:
+    tool_id: jigsaw
+    code_label: "0875"
+    official_name: "Jigsaws"
+    start_year: 1978
+    comparability_note: "stable since 1978; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  864:
+    tool_id: reciprocating_saw
+    code_label: "0864"
+    official_name: "Sabre saws"
+    start_year: 1978
+    comparability_note: "stable since 1978; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  895:
+    tool_id: other_power_saw
+    code_label: "0895"
+    official_name: "Power saws, other or not specified"
+    start_year: 2003
+    comparability_note: "0895 formed in 2003 by combining retired 0863 and 0872, and powered miter saws are coded here"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: true
+  845:
+    tool_id: saw_unspecified
+    code_label: "0845"
+    official_name: "Saws, not specified"
+    start_year: 1974
+    comparability_note: "stable since 1974; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: true
+  804:
+    tool_id: router
+    code_label: "0804"
+    official_name: "Power routers"
+    start_year: 1972
+    comparability_note: "stable since 1972; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  807:
+    tool_id: jointer
+    code_label: "0807"
+    official_name: "Power jointers"
+    start_year: 1972
+    comparability_note: "stable since 1972; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  805:
+    tool_id: lathe
+    code_label: "0805"
+    official_name: "Power lathes"
+    start_year: 1972
+    comparability_note: "stable since 1972; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  808:
+    tool_id: shaper
+    code_label: "0808"
+    official_name: "Power shapers"
+    start_year: 1972
+    comparability_note: "stable since 1972; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  809:
+    tool_id: other_power_tool
+    code_label: "0809"
+    official_name: "Other portable or stationary power tools"
+    start_year: 1972
+    comparability_note: "stable since 1972; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: true
+  803:
+    tool_id: sander
+    code_label: "0803"
+    official_name: "Power sanders"
+    start_year: 1972
+    comparability_note: "stable since 1972; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  897:
+    tool_id: grinder_power
+    code_label: "0897"
+    official_name: "Power workshop grinders, buffers or polishers"
+    start_year: 2006
+    comparability_note: "0897/0898/0899 were split out in 2006"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  899:
+    tool_id: grinder_unspecified
+    code_label: "0899"
+    official_name: "Workshop grinders, buffers or polishers, not specified"
+    start_year: 2006
+    comparability_note: "0897/0898/0899 were split out in 2006"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: true
+  855:
+    tool_id: drill_portable
+    code_label: "0855"
+    official_name: "Portable power drills and accessories"
+    start_year: 1978
+    comparability_note: "stable since 1978; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  856:
+    tool_id: drill_press
+    code_label: "0856"
+    official_name: "Stationary power drills and accessories"
+    start_year: 1978
+    comparability_note: "stable since 1978; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  871:
+    tool_id: drill_power_unspecified
+    code_label: "0871"
+    official_name: "Power drills or accessories, not specified"
+    start_year: 1978
+    comparability_note: "stable since 1978; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: true
+  847:
+    tool_id: drill_unspecified
+    code_label: "0847"
+    official_name: "Drills, not specified"
+    start_year: 1974
+    comparability_note: "stable since 1974; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: true
+  882:
+    tool_id: nail_gun
+    code_label: "0882"
+    official_name: "Nail guns or stud drivers"
+    start_year: 1979
+    comparability_note: "stable since 1979; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  830:
+    tool_id: hand_saw
+    code_label: "0830"
+    official_name: "Hand saws"
+    start_year: 1972
+    comparability_note: "stable since 1972; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  894:
+    tool_id: hacksaw
+    code_label: "0894"
+    official_name: "Hacksaws"
+    start_year: 2003
+    comparability_note: "0894 replaced retired 0844 (power hack saws) in 2003"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  870:
+    tool_id: chisel_plane
+    code_label: "0870"
+    official_name: "Awls, chisels or planes"
+    start_year: 1978
+    comparability_note: "stable since 1978; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: true
+  862:
+    tool_id: manual_sanding
+    code_label: "0862"
+    official_name: "Manual filing or sanding tools"
+    start_year: 1978
+    comparability_note: "stable since 1978; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: true
+  898:
+    tool_id: grinder_manual
+    code_label: "0898"
+    official_name: "Manual workshop grinders, buffers or polishers"
+    start_year: 2006
+    comparability_note: "0897/0898/0899 were split out in 2006"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+  879:
+    tool_id: clamp_vise
+    code_label: "0879"
+    official_name: "Vises or workshop clamps"
+    start_year: 1978
+    comparability_note: "stable since 1978; active in 2025 Comparability Table"
+    validated_against: "2025 Comparability Table"
+    in_scope: true
+    broad: false
+
+# D-02: excluded from default scope but explicitly documented, not silent. v2 ADJ-01.
+adjacent:
+  834:
+    label: "Heavy-duty workshop staplers"
+    reason: "excluded from the default population per D-02; deferred requirement ADJ-01"
+  836:
+    label: "Knives with replaceable blades"
+    reason: "excluded from the default population per D-02; deferred requirement ADJ-01"
+  881:
+    label: "Other manual workshop tools"
+    reason: "excluded from the default population per D-02; deferred requirement ADJ-01"
+  893:
+    label: "Tools, not specified"
+    reason: "excluded from the default population per D-02; deferred requirement ADJ-01"
+  1411:
+    label: "Chain saws"
+    reason: "excluded from the default population per D-02; deferred requirement ADJ-01"
+
+excluded_categories:
+  yard_tools:
+    note: "Yard and garden power equipment is excluded by construction, because membership is an explicit allow-list."

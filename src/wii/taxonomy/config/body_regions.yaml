@@ -1,0 +1,42 @@
+# Body-region / SVG map (D-18). Every body_parts.yaml code maps to exactly one region or
+# callout. NEISS has no laterality (left/right), so the SVG id convention has no l/r suffix:
+# view "both" -> ["{region_id}-front", "{region_id}-back"]; view "front" -> ["{region_id}-front"];
+# callouts carry an empty svg_element_ids list. This is the contract the Phase 4 body-map SVG
+# must adopt.
+version: 1
+
+regions:
+  head:         {label: "Head", body_part_codes: [75], view: both, svg_element_ids: ["head-front", "head-back"], sort_order: 1}
+  face:         {label: "Face (including eyelid, eye area and nose)", body_part_codes: [76], view: front, svg_element_ids: ["face-front"], sort_order: 2}
+  eye:          {label: "Eyeball", body_part_codes: [77], view: front, svg_element_ids: ["eye-front"], sort_order: 3}
+  mouth:        {label: "Mouth (including lips, tongue and teeth)", body_part_codes: [88], view: front, svg_element_ids: ["mouth-front"], sort_order: 4}
+  ear:          {label: "Ear", body_part_codes: [94], view: both, svg_element_ids: ["ear-front", "ear-back"], sort_order: 5}
+  neck:         {label: "Neck", body_part_codes: [89], view: both, svg_element_ids: ["neck-front", "neck-back"], sort_order: 6}
+  shoulder:     {label: "Shoulder (including clavicle, collarbone)", body_part_codes: [30], view: both, svg_element_ids: ["shoulder-front", "shoulder-back"], sort_order: 7}
+  upper_arm:    {label: "Arm, upper", body_part_codes: [80], view: both, svg_element_ids: ["upper_arm-front", "upper_arm-back"], sort_order: 8}
+  elbow:        {label: "Elbow", body_part_codes: [32], view: both, svg_element_ids: ["elbow-front", "elbow-back"], sort_order: 9}
+  lower_arm:    {label: "Arm, lower (not including elbow or wrist)", body_part_codes: [33], view: both, svg_element_ids: ["lower_arm-front", "lower_arm-back"], sort_order: 10}
+  wrist:        {label: "Wrist", body_part_codes: [34], view: both, svg_element_ids: ["wrist-front", "wrist-back"], sort_order: 11}
+  hand:         {label: "Hand", body_part_codes: [82], view: both, svg_element_ids: ["hand-front", "hand-back"], sort_order: 12}
+  finger:       {label: "Finger", body_part_codes: [92], view: both, svg_element_ids: ["finger-front", "finger-back"], sort_order: 13}
+  upper_trunk:  {label: "Trunk, upper (not including shoulders)", body_part_codes: [31], view: both, svg_element_ids: ["upper_trunk-front", "upper_trunk-back"], sort_order: 14}
+  lower_trunk:  {label: "Trunk, lower", body_part_codes: [79], view: both, svg_element_ids: ["lower_trunk-front", "lower_trunk-back"], sort_order: 15}
+  pubic_region: {label: "Pubic region", body_part_codes: [38], view: front, svg_element_ids: ["pubic_region-front"], sort_order: 16}
+  upper_leg:    {label: "Leg, upper", body_part_codes: [81], view: both, svg_element_ids: ["upper_leg-front", "upper_leg-back"], sort_order: 17}
+  knee:         {label: "Knee", body_part_codes: [35], view: both, svg_element_ids: ["knee-front", "knee-back"], sort_order: 18}
+  lower_leg:    {label: "Leg, lower (not including knee or ankle)", body_part_codes: [36], view: both, svg_element_ids: ["lower_leg-front", "lower_leg-back"], sort_order: 19}
+  ankle:        {label: "Ankle", body_part_codes: [37], view: both, svg_element_ids: ["ankle-front", "ankle-back"], sort_order: 20}
+  foot:         {label: "Foot", body_part_codes: [83], view: both, svg_element_ids: ["foot-front", "foot-back"], sort_order: 21}
+  toe:          {label: "Toe", body_part_codes: [93], view: front, svg_element_ids: ["toe-front"], sort_order: 22}
+
+callouts:
+  internal:     {label: "Internal (use with aspiration and ingestion)", body_part_codes: [0], view: callout, svg_element_ids: [], sort_order: 23}
+  burn_25_50:   {label: "25-50% of body (used for burns only)", body_part_codes: [84], view: callout, svg_element_ids: [], sort_order: 24}
+  all_body:     {label: "All parts of body (more than 50% of body)", body_part_codes: [85], view: callout, svg_element_ids: [], sort_order: 25}
+  not_recorded: {label: "Not recorded", body_part_codes: [87], view: callout, svg_element_ids: [], sort_order: 26}
+
+rollups:
+  hand_finger: [82, 92]
+  head_face: [75, 76, 77, 88, 94]
+  eye: [77]
+  eye_face: [76, 77]

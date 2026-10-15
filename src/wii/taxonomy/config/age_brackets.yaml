@@ -1,0 +1,51 @@
+# Age brackets (D-14). min_years inclusive, max_years exclusive (null = no upper bound). Every
+# in-scope case keeps its row regardless of bracket -- the adults-only default is applied at
+# query time in Phase 2/3, never by dropping rows here.
+version: 1
+
+brackets:
+  age_0_17:
+    label: "0-17"
+    min_years: 0
+    max_years: 18
+    sort_order: 1
+  age_18_24:
+    label: "18-24"
+    min_years: 18
+    max_years: 25
+    sort_order: 2
+  age_25_34:
+    label: "25-34"
+    min_years: 25
+    max_years: 35
+    sort_order: 3
+  age_35_44:
+    label: "35-44"
+    min_years: 35
+    max_years: 45
+    sort_order: 4
+  age_45_54:
+    label: "45-54"
+    min_years: 45
+    max_years: 55
+    sort_order: 5
+  age_55_64:
+    label: "55-64"
+    min_years: 55
+    max_years: 65
+    sort_order: 6
+  age_65_74:
+    label: "65-74"
+    min_years: 65
+    max_years: 75
+    sort_order: 7
+  age_75_plus:
+    label: "75+"
+    min_years: 75
+    max_years: null
+    sort_order: 8
+  unknown:
+    label: "Unknown"
+    min_years: null
+    max_years: null
+    sort_order: 9

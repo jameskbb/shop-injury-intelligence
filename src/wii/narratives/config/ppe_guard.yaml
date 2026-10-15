@@ -1,0 +1,48 @@
+version: 1
+
+# D-16: explicit positive and explicit negative patterns ONLY. Absence of any of these phrases
+# is always not_mentioned -- never inferred from PPE/guard silence.
+ppe:
+  worn:
+    - "WEARING SAFETY GLASSES"
+    - "WEARING SAFETYGLASSES"
+    - "WEARING GOGGLES"
+    - "WEARING GLASSES"
+    - "WEARING PROTECTIVE GLASSES"
+    - "WEARING GLOVES"
+    - "WEARING UTILITY GLOVES"
+    - "WEARING EAR PROTECTION"
+    - "WITH FACE PROTECTION"
+    - "FACE PROTECTION ON"
+  not_worn:
+    - "NO EYE PROTECTION"
+    - "NO GLOVES"
+    - "NOT WEARING"
+    - "NOTWEARING"
+    - "DENIES WEARING"
+    - "WASN'T WEARING"
+    - "WAS NOT WEARING"
+    - "WITHOUT WEARING GOGGLES"
+    - "WITHOUT EYE PROTECTION"
+    - "WITHOUT SAFETY GLASSES"
+    - "WITHOUT GLASSES"
+    - "WITHOUT GOGGLES"
+    - "WITHOUT GLOVES"
+    - "WITHOUT UTILITY GLOVES"
+    - "WITHOUT EAR PROTECTION"
+
+guard:
+  present:
+    - "SAFETY GUARD ON SAW"
+    - "SAFETYGUARD ON"
+    - "GUARD ON SAW"
+    - "WITH GUARD"
+  absent:
+    - "GUARD REMOVED"
+    - "BROKEN BLADE GUARD"
+    - "WITHOUT GUARD"
+    - "WITHOUT A SAFETY GUARD"
+    - "WITHOUT A GUARD"
+    - "NO GUARD"
+    - "MISSING GUARD"
+    - "GUARD OFF"

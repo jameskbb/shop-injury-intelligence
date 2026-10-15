@@ -1,0 +1,89 @@
+# D-13/INS-01 insight-engine thresholds. Every value is documented in docs/insights.md (T-03-08).
+# Every comparison in wii.analytics.insights uses these keys via inclusive `>=` comparisons on
+# UNROUNDED metric values -- nothing here is duplicated as a hard-coded literal in insights.py.
+
+# Minimum raw sample-case count (BOTH compared cells) for any comparison to be eligible.
+min_raw_n: 50
+
+# Share comparisons (severity, disproportionate, pairwise_comparison): a tool's share must be at
+# least this many TIMES the baseline/other-tool's share...
+share_ratio_min: 1.5
+# ...AND at least this many PERCENTAGE POINTS higher (both gates required).
+share_pp_min: 5.0
+
+# burden_vs_share: (share of a severe outcome) / (share of overall burden) must be at least this.
+burden_outcome_ratio_min: 1.5
+
+# trend: |percent change| between latest-N-year and prior-N-year annual averages.
+trend_pct_min: 20.0
+trend_window_years: 3
+# When true, the two windows' 95% CIs must not overlap for the trend to qualify.
+trend_require_nonoverlapping_ci: true
+
+# Output shaping.
+max_cards: 5
+min_cards_for_section: 3
+
+# Minimum narrative-excerpt classifier confidence (consumed by 03-03's representative-case
+# section, not by this plan's charts).
+narrative_min_confidence: 0.70
+
+# D-13 MECHANISM TREND consistency gate (wii.analytics.mechanism_trend). A year's weighted
+# unknown-mechanism share is shown in the trend only if it stays within this many percentage
+# points of the pooled 2019-latest window's own unknown share. Planning-time measurement
+# (04-RESEARCH.md Metadata table, VERIFIED against committed data): all 7 committed years
+# 2019-2025 fall within 1.59pp of the window average (33.73%), so 5.0 excludes no current year
+# while still catching a genuinely divergent year in a future data refresh (e.g. a classifier
+# regression or an undocumented schema change).
+mechanism_trend_unknown_tolerance_pp: 5.0
+
+# Minimum number of gate-passing years required before the trend chart is shown at all -- fewer
+# than this shows the insufficient-years note instead.
+mechanism_trend_min_years: 3
+
+# Number of top STABLE, non-unknown/non-other mechanisms plotted as separate trend lines.
+mechanism_trend_top_n: 5
+
+# ---------------------------------------------------------------------------
+# SIGNALS page (src/wii/app/pages/signals.py): the cross-cutting ranked feed of the strongest
+# findings the INS-01 engine produces across ALL tools, plus the significance tier shown on each
+# card. Nothing below is repeated as a literal in the page module -- the page reads this block
+# the same way `wii.analytics.mechanism_trend.load_trend_gate` reads its own `mechanism_trend_*`
+# keys, and `load_thresholds` ignores it (it only reads the `Thresholds` field names).
+#
+# TIERS. A finding's tier is NOT its raw effect size: effect sizes are not comparable across the
+# five insight kinds (a `trend` effect size is a percent change, a share/burden effect size is a
+# ratio). The page normalizes each finding to its "threshold multiple" -- the finding's own
+# effect size divided by the gate its kind had to clear (`share_ratio_min`,
+# `burden_outcome_ratio_min` or `trend_pct_min` above) -- so a tier means the same thing for
+# every kind: "this finding cleared its own qualifying threshold by N times". Every qualifying
+# finding therefore has a multiple of at least 1.0, and a tier additionally requires a supporting
+# sample-case count, so a large effect measured on a handful of cases is never promoted.
+# ---------------------------------------------------------------------------
+signals:
+  # How many ranked candidates the page pulls from the engine before re-ranking them by threshold
+  # multiple and tiering them. Comfortably above the number of tool x dimension comparisons that
+  # can clear the gates at once, so the feed is a re-ranking of ALL qualifying findings rather
+  # than a re-ranking of the engine's own top `max_cards`.
+  candidate_pool: 200
+  # Cards shown in the feed. Larger than `max_cards` above (which shapes a SECTION on another
+  # page) because this page is the feed, but still bounded so the page stays readable.
+  max_cards: 12
+  # Ordered strongest-first; the first rule a finding satisfies wins. `min_strength` is the
+  # threshold multiple described above; `min_raw_n` is the finding's own supporting sample-case
+  # count, expressed as a multiple of `min_raw_n: 50` (4x for the top tier, 2x for the middle).
+  # Tier names are DISPLAY strings and are written in sentence case here, at the source, rather
+  # than upper-cased in CSS: a tracked-out all-caps eyebrow repeated above fifteen cards is the
+  # commonest tell of a generated page, and caps in the data would still reach a screen reader
+  # and the guardrail scanner as caps. The page's own strength bar carries rank far more
+  # precisely than a two-level word ever did.
+  tiers:
+    - name: High impact
+      min_strength: 2.0
+      min_raw_n: 200
+    - name: Notable
+      min_strength: 1.5
+      min_raw_n: 100
+  # Every finding that cleared the engine's gates but neither tier rule above. These are real,
+  # fully-gated findings, so they are shown -- just not promoted.
+  base_tier: Moderate

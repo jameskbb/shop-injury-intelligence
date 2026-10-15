@@ -1,0 +1,22 @@
+version: 1
+
+# D-13 clinical-abbreviation expansion table. Matched with token boundaries in normalize.py
+# (longest key first, so "W/O" is tried before "W/"). Keys are already uppercase since
+# normalize.py uppercases before this pass runs.
+LAC: LACERATION
+FX: FRACTURE
+FB: FOREIGN BODY
+PT: PATIENT
+YOM: YEAR OLD MALE
+YOF: YEAR OLD FEMALE
+DX: DIAGNOSIS
+"C/O": COMPLAINS OF
+"S/P": STATUS POST
+"W/O": WITHOUT
+"W/": WITH
+"R/L": RIGHT LEFT
+BIBA: BROUGHT IN BY AMBULANCE
+CONTU: CONTUSION
+ABR: ABRASION
+INJ: INJURY
+HX: HISTORY

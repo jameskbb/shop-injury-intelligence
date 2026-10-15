@@ -1,0 +1,12 @@
+version: 1
+
+# D-17: 8 activities from verb cues, defaulting to unknown. Order doesn't matter for matching
+# (categories are checked independently); "unknown" is the fallback when nothing matches.
+categories:
+  cutting: ["CUTTING", "SAWING"]
+  drilling: ["DRILLING"]
+  fastening: ["NAILING", "FASTENING"]
+  sanding_grinding: ["SANDING", "GRINDING"]
+  shaping: ["ROUTING", "PLANING", "SHAPING"]
+  setup_maintenance: ["CHANGING", "CLEANING", "ADJUSTING"]
+  carrying_moving: ["CARRYING", "MOVING", "LIFTING"]

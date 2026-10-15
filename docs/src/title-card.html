@@ -1,0 +1,107 @@
+<!doctype html>
+<!--
+  Source for docs/images/readme-title-shop-injury-intelligence.png.
+  Render with: uv run --with playwright==1.62.0 python docs/src/render_title_card.py
+
+  1200x440 at 2x, the title-card convention shared by the author's public repositories: the
+  wordmark and a one-line pitch on the left, the subject drawn on the right. Colours and type are
+  the app's own tokens from src/wii/app/theme.py (vellum, graphite, blueprint; Archivo and Archivo
+  Narrow). The five bars are the committed release's real annual-average estimates for adults,
+  2006 to 2025, from data/processed/agg_tool_year.parquet; re-run the query in the renderer's
+  docstring and update them when the data refreshes.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Narrow:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --vellum: #E8EAE5;
+    --vellum-deep: #DADDD5;
+    --graphite: #22272A;
+    --graphite-soft: #6B736F;
+    --blueprint: #1C5B7D;
+    --redline: #A83E27;
+    --rule: rgba(34, 39, 42, .22);
+    --grid: rgba(34, 39, 42, .08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 440px; }
+  body {
+    font-family: "Archivo", -apple-system, "Segoe UI", sans-serif;
+    color: var(--graphite);
+    background-color: var(--vellum);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+    position: relative; overflow: hidden;
+  }
+  /* datum edge: the drafted sheet's reference line */
+  .datum { position: absolute; left: 56px; top: 48px; bottom: 48px; width: 0; border-left: 1.5px solid var(--graphite); }
+  .datum::before, .datum::after {
+    content: ""; position: absolute; left: -5px; width: 9px; height: 9px;
+    border: 1.5px solid var(--graphite); border-radius: 50%; background: var(--vellum);
+  }
+  .datum::before { top: -5px; } .datum::after { bottom: -5px; }
+
+  .left { position: absolute; left: 84px; top: 74px; width: 520px; }
+  .word { font-family: "Archivo Narrow", "Archivo", sans-serif; font-weight: 600; font-size: 20px; letter-spacing: .01em; color: var(--blueprint); }
+  .word::after { content: ""; display: block; width: 64px; height: 2px; background: var(--blueprint); margin-top: 10px; }
+  h1 { margin-top: 22px; font-size: 44px; font-weight: 600; line-height: 1.08; letter-spacing: -.02em; }
+  p.lede { margin-top: 18px; font-size: 19px; line-height: 1.4; color: var(--graphite-soft); max-width: 470px; }
+
+  /* the subject: a ranked bar drawn as a measured callout */
+  .plate { position: absolute; left: 656px; top: 64px; width: 480px; }
+  .plate .cap { font-family: "Archivo Narrow", sans-serif; font-size: 14px; color: var(--graphite-soft); margin-bottom: 14px; }
+  .row { display: grid; grid-template-columns: 150px 1fr 60px; align-items: center; height: 44px; border-top: 1px solid var(--rule); }
+  .row:last-of-type { border-bottom: 1px solid var(--rule); }
+  .row .lab { font-family: "Archivo Narrow", sans-serif; font-size: 16px; font-weight: 500; padding-right: 10px; line-height: 1.1; }
+  .row .bar { position: relative; height: 18px; border-left: 1px solid var(--graphite); }
+  .row .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--blueprint); display: block; }
+  .row .val { font-family: "Archivo Narrow", sans-serif; font-size: 16px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+  .row:nth-child(2) .bar i { width: 100%; opacity: 1; }
+  .row:nth-child(3) .bar i { width: 60%;  opacity: .82; }
+  .row:nth-child(4) .bar i { width: 43%;  opacity: .70; }
+  .row:nth-child(5) .bar i { width: 34%;  opacity: .62; }
+  .row:nth-child(6) .bar i { width: 31%;  opacity: .56; }
+
+  /* title block: the one deliberate caps artifact, quoting a drafting sheet */
+  .block {
+    position: absolute; right: 56px; bottom: 44px; display: flex; border: 1.5px solid var(--graphite);
+    font-family: "Archivo Narrow", sans-serif; font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+    background: var(--vellum);
+  }
+  .block div { padding: 7px 12px; border-right: 1.5px solid var(--graphite); }
+  .block div:last-child { border-right: 0; }
+  .block b { display: block; font-weight: 600; font-size: 12px; letter-spacing: .04em; margin-top: 1px; }
+  .block small { color: var(--graphite-soft); }
+  .redline { color: var(--redline); }
+</style>
+</head>
+<body>
+  <div class="datum"></div>
+  <div class="left">
+    <div class="word">Workshop Injury Intelligence</div>
+    <h1>What sends workshop users to the ER?</h1>
+    <p class="lede">Twenty years of CPSC emergency-department surveillance, survey-weighted and read by tool, body region and mechanism. Burden kept separate from severity; no per-use risk claimed.</p>
+  </div>
+
+  <div class="plate">
+    <div class="cap">Estimated U.S. ER-treated injuries, annual average 2006&#8211;2025, adults</div>
+    <div class="row"><span class="lab">Bench or table saw</span><span class="bar"><i></i></span><span class="val">33,000</span></div>
+    <div class="row"><span class="lab">Grinder</span><span class="bar"><i></i></span><span class="val">19,700</span></div>
+    <div class="row"><span class="lab">Saw, unspecified</span><span class="bar"><i></i></span><span class="val">14,300</span></div>
+    <div class="row"><span class="lab">Circular saw</span><span class="bar"><i></i></span><span class="val">11,300</span></div>
+    <div class="row"><span class="lab">Drill</span><span class="bar"><i></i></span><span class="val">10,300</span></div>
+  </div>
+
+  <div class="block">
+    <div><small>Source</small><b>CPSC NEISS 2006&#8211;2025</b></div>
+    <div><small>Basis</small><b>Survey-weighted</b></div>
+    <div><small>Scale</small><b class="redline">No exposure denominator</b></div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# "Shop drawing" light theme. Tokens mirror src/wii/app/theme.py, which is the source of truth --
+# these keys only cover the Streamlit chrome that CSS injection cannot reach (widget internals,
+# the sidebar frame). Fonts are loaded via theme.py's injected CSS, not config.toml's font keys.
+# The design contract is docs/design-system.md.
+
+[theme]
+base = "light"
+primaryColor = "#1C5B7D"
+backgroundColor = "#E8EAE5"
+secondaryBackgroundColor = "#DADDD5"
+textColor = "#22272A"
+borderColor = "#C3C8C0"
+
+[client]
+toolbarMode = "minimal"

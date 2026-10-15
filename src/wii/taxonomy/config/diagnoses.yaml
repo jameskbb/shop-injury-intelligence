@@ -1,0 +1,130 @@
+# Diagnosis codes (D-15). Transcribed verbatim from the NEISS Coding Manual, January 2025
+# (rev.1), page 16 ("Diagnosis 1 and 2" table). injury_category is this plan's rollup, chosen
+# so each code maps to exactly one category.
+version: 1
+source:
+  document: "NEISS Coding Manual, January 2025 (rev.1)"
+  url: "https://www.cpsc.gov/s3fs-public/JANUARY-2025-NEISS-CPSC-only-Coding-Manual-Rev-1.pdf"
+  pages: "16-22"
+
+codes:
+  41:
+    label: "Ingested foreign object"
+    manual_page: 16
+    injury_category: ingested_aspirated_object
+  42:
+    label: "Aspirated foreign object"
+    manual_page: 16
+    injury_category: ingested_aspirated_object
+  46:
+    label: "Burns, electrical"
+    manual_page: 16
+    injury_category: burn
+  47:
+    label: "Burns, not specified"
+    manual_page: 16
+    injury_category: burn
+  48:
+    label: "Burns, scald (from hot liquids or steam)"
+    manual_page: 16
+    injury_category: burn
+  49:
+    label: "Burns, chemical (caustics, etc.)"
+    manual_page: 16
+    injury_category: burn
+  50:
+    label: "Amputation"
+    manual_page: 16
+    injury_category: amputation
+  51:
+    label: "Burns, thermal (from flames or hot surface)"
+    manual_page: 16
+    injury_category: burn
+  52:
+    label: "Concussions"
+    manual_page: 16
+    injury_category: concussion
+  53:
+    label: "Contusions, Abrasions"
+    manual_page: 16
+    injury_category: contusion_abrasion
+  54:
+    label: "Crushing"
+    manual_page: 16
+    injury_category: crushing
+  55:
+    label: "Dislocation"
+    manual_page: 16
+    injury_category: dislocation
+  56:
+    label: "Foreign body"
+    manual_page: 16
+    injury_category: foreign_body
+  57:
+    label: "Fracture"
+    manual_page: 16
+    injury_category: fracture
+  58:
+    label: "Hematoma"
+    manual_page: 16
+    injury_category: hematoma
+  59:
+    label: "Laceration"
+    manual_page: 16
+    injury_category: laceration
+  60:
+    label: "Dental injury"
+    manual_page: 16
+    injury_category: dental
+  61:
+    label: "Nerve damage"
+    manual_page: 16
+    injury_category: nerve_damage
+  62:
+    label: "Internal organ injury"
+    manual_page: 16
+    injury_category: internal_organ
+  63:
+    label: "Puncture"
+    manual_page: 16
+    injury_category: puncture
+  64:
+    label: "Strain or Sprain"
+    manual_page: 16
+    injury_category: strain_sprain
+  65:
+    label: "Anoxia"
+    manual_page: 16
+    injury_category: anoxia
+  66:
+    label: "Hemorrhage"
+    manual_page: 16
+    injury_category: hemorrhage
+  67:
+    label: "Electric shock"
+    manual_page: 16
+    injury_category: electric_shock
+  68:
+    label: "Poisoning"
+    manual_page: 16
+    injury_category: poisoning
+  69:
+    label: "Submersion (including Drowning)"
+    manual_page: 16
+    injury_category: submersion
+  71:
+    label: "Other/Not Stated"
+    manual_page: 16
+    injury_category: other_not_stated
+  72:
+    label: "Avulsion"
+    manual_page: 16
+    injury_category: avulsion
+  73:
+    label: "Burns, radiation"
+    manual_page: 16
+    injury_category: burn
+  74:
+    label: "Dermatitis, Conjunctivitis"
+    manual_page: 16
+    injury_category: dermatitis_conjunctivitis

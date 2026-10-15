@@ -1,0 +1,47 @@
+# Location-of-incident codes (D-15). Code 3 does not exist (PITFALLS.md Pitfall 3). Transcribed
+# verbatim from the NEISS Coding Manual, January 2025 (rev.1), page 36. No work-related attribute
+# is attached to any code here (e.g. code 7 Industrial place) -- see D-19/PITFALLS Pitfall 10:
+# the NEISS work-related exclusion is not independently re-derivable from Location.
+version: 1
+source:
+  document: "NEISS Coding Manual, January 2025 (rev.1)"
+  url: "https://www.cpsc.gov/s3fs-public/JANUARY-2025-NEISS-CPSC-only-Coding-Manual-Rev-1.pdf"
+  pages: "36-37"
+
+codes:
+  0:
+    label: "Unknown or not recorded"
+    manual_page: 36
+    sort_order: 1
+  1:
+    label: "Home"
+    manual_page: 36
+    sort_order: 2
+  2:
+    label: "Farm/Ranch"
+    manual_page: 36
+    sort_order: 3
+  4:
+    label: "Street or highway"
+    manual_page: 36
+    sort_order: 4
+  5:
+    label: "Other public property"
+    manual_page: 36
+    sort_order: 5
+  6:
+    label: "Manufactured (Mobile) home"
+    manual_page: 36
+    sort_order: 6
+  7:
+    label: "Industrial place"
+    manual_page: 36
+    sort_order: 7
+  8:
+    label: "School"
+    manual_page: 36
+    sort_order: 8
+  9:
+    label: "Place of recreation or sports"
+    manual_page: 36
+    sort_order: 9

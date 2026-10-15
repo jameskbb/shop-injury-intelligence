@@ -1,0 +1,137 @@
+# D-09/D-10 severity metric definitions. Loaded with yaml.safe_load only; validated at load time
+# (unknown kind/code/direction raises naming the key path, T-02-02).
+#
+# kind:
+#   disposition_bucket    -- numerator = fc.disposition_code IN codes; denominator = known
+#                            disposition (dim_disposition.severity_bucket != 'not_recorded')
+#   disposition_escalated -- numerator = dim_disposition.escalated_care = TRUE; same denominator
+#   diagnosis_any         -- numerator = any-recorded diagnosis code in `codes` (bridge, either
+#                            slot); denominator = all cases in the group
+#   body_rollup_any       -- numerator = any-recorded body part in dim_body_rollup(rollup_id);
+#                            denominator = all cases in the group
+#
+# direction -- REQUIRED on every metric. It states what a HIGHER value of this share means about
+# the composition of the ER-treated cases in a group. It is deliberately NOT a "good/bad",
+# "higher is better/worse" or "safe/unsafe" axis, and it must never be rendered, sorted or
+# ranked as one.
+#
+# Why the usual `higher_is_better` field is wrong here, and is not offered as an option:
+# every metric in this file is a SHARE AMONG CASES THAT ALREADY REACHED AN EMERGENCY DEPARTMENT.
+# NEISS has no exposure denominator -- nothing in the dataset says how many hours anyone spent
+# using a table saw, a nail gun or a chisel. So a larger amputation share for tool A than tool B
+# cannot mean tool A is more hazardous per use: it can equally mean A's minor injuries are more
+# often self-treated at home and never show up in an ED at all, which DEFLATES A's denominator
+# and inflates every severe share it has. A direction vocabulary of good/bad would encode exactly
+# the per-use risk claim this product refuses to make, and would be structurally impossible to
+# label honestly. The vocabulary below therefore describes the numerator's clinical content, not
+# a judgement about the tool.
+#
+# The closed vocabulary (wii.metrics.severity.METRIC_DIRECTIONS; adding a value requires adding
+# its gloss in wii.metrics.severity.DIRECTION_GLOSS, which tests enforce):
+#
+#   higher_means_more_acute_care
+#       A larger share of this group's ER cases needed care BEYOND emergency-department
+#       treat-and-release (transfer, admission, observation) or ended in death. Comparable
+#       between groups as a description of those groups' ER cases; not a per-use comparison.
+#   higher_means_less_acute_care
+#       A larger share of this group's ER cases were treated and released. The mirror of the
+#       above and equally not a safety statement -- a group can score high here simply because
+#       its injuries reach an ED more readily.
+#   higher_means_care_not_completed
+#       A larger share of cases left without being seen or treated. This reflects patient
+#       behaviour and department process, not injury severity, and carries no clinical ordering
+#       in either direction.
+#   higher_means_more_tissue_damage
+#       A larger share of this group's ER cases carried a diagnosis that is destructive or
+#       structural by definition (tissue lost, torn away, crushed, or bone broken) rather than
+#       one that spans trivial-to-severe. A statement about what the injuries were, not about
+#       how likely they are.
+#   no_severity_ordering
+#       A higher value carries NO severity meaning at all. This covers the body-region rollups
+#       (where an injury happened is composition, not grade) and the diagnosis categories whose
+#       codes run the full range from trivial to severe (a laceration may be a scratch or a
+#       tendon transection; NEISS records neither depth nor repair). These are the metrics for
+#       which "which direction is better" has no answer, and the field says so explicitly
+#       instead of defaulting to one.
+version: 1
+metrics:
+  released:
+    kind: disposition_bucket
+    codes: [1]
+    direction: higher_means_less_acute_care
+  transferred:
+    kind: disposition_bucket
+    codes: [2]
+    direction: higher_means_more_acute_care
+  admitted:
+    kind: disposition_bucket
+    codes: [4]
+    direction: higher_means_more_acute_care
+  observation:
+    kind: disposition_bucket
+    codes: [5]
+    direction: higher_means_more_acute_care
+  left_without_treatment:
+    kind: disposition_bucket
+    codes: [6]
+    direction: higher_means_care_not_completed
+  # Fatality sits in the acute-care tier as its most extreme end (the case did not end in
+  # treat-and-release). NEISS fatality counts are tiny and are almost always suppressed by the
+  # CPSC stability rules before they reach a screen.
+  fatality:
+    kind: disposition_bucket
+    codes: [8]
+    direction: higher_means_more_acute_care
+  escalated_care:
+    kind: disposition_escalated
+    direction: higher_means_more_acute_care
+  amputation:
+    kind: diagnosis_any
+    codes: [50]
+    direction: higher_means_more_tissue_damage
+  laceration:
+    kind: diagnosis_any
+    codes: [59]
+    direction: no_severity_ordering
+  fracture:
+    kind: diagnosis_any
+    codes: [57]
+    direction: higher_means_more_tissue_damage
+  puncture:
+    kind: diagnosis_any
+    codes: [63]
+    direction: no_severity_ordering
+  foreign_body:
+    kind: diagnosis_any
+    codes: [56]
+    direction: no_severity_ordering
+  contusion:
+    kind: diagnosis_any
+    codes: [53]
+    direction: no_severity_ordering
+  avulsion:
+    kind: diagnosis_any
+    codes: [72]
+    direction: higher_means_more_tissue_damage
+  crushing:
+    kind: diagnosis_any
+    codes: [54]
+    direction: higher_means_more_tissue_damage
+  # Body-region rollups describe WHERE injuries landed. Composition only -- an eye share and a
+  # hand share are not on a common scale and neither is "worse".
+  eye:
+    kind: body_rollup_any
+    rollup_id: eye
+    direction: no_severity_ordering
+  eye_face:
+    kind: body_rollup_any
+    rollup_id: eye_face
+    direction: no_severity_ordering
+  hand_finger:
+    kind: body_rollup_any
+    rollup_id: hand_finger
+    direction: no_severity_ordering
+  head_face:
+    kind: body_rollup_any
+    rollup_id: head_face
+    direction: no_severity_ordering

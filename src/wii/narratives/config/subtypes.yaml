@@ -1,0 +1,174 @@
+version: 1
+
+# D-14: the 4 narrative-refined final tools (on top of the 27 official tool_ids).
+refined_tools:
+  miter_saw:
+    label: "Miter Saw"
+    family_id: saws
+  planer:
+    label: "Planer"
+    family_id: cutting_shaping
+  angle_grinder:
+    label: "Angle Grinder"
+    family_id: abrasive
+  bench_grinder:
+    label: "Bench Grinder"
+    family_id: abrasive
+
+# Named context term-lists referenced by patterns' require_context / exclude_context.
+context_terms:
+  metal_context:
+    - METAL
+    - STEEL
+    - PIPE
+    - REBAR
+    - ABRASIVE
+    - "CUT-OFF"
+    - CUTOFF
+    - ALUMINUM
+    - COPPER
+    - IRON
+
+# D-14: refinement is allowed ONLY for these 8 broad codes.
+broad_codes:
+  895:
+    allowed_targets: [miter_saw]
+    patterns:
+      - id: miter_saw_explicit
+        phrases: ["MITER SAW", "MITRE SAW"]
+        subtype: miter_saw
+        target: miter_saw
+        confidence: 0.90
+      - id: chop_saw_wood
+        phrases: ["CHOP SAW"]
+        subtype: miter_saw
+        target: miter_saw
+        confidence: 0.75
+        exclude_context: metal_context
+      - id: chop_saw_metal
+        phrases: ["CHOP SAW"]
+        subtype: chop_saw_metal
+        confidence: 0.75
+        require_context: metal_context
+
+  # 0809: "Other portable or stationary power tools".
+  809:
+    allowed_targets: [planer]
+    patterns:
+      - id: planer_809
+        phrases: ["PLANER", "ELECTRIC PLANER", "THICKNESS PLANER"]
+        subtype: planer
+        target: planer
+        confidence: 0.90
+
+  # 0845: "Saws, not specified" -- may refine to any of the 6 named specific saw tools, all
+  # already-official tool_ids (not new refined tools). Two distinct named saws in the same
+  # narrative is a conflicting term -- rules.py's classify.py withholds refinement generically
+  # whenever more than one distinct target is matched.
+  845:
+    allowed_targets:
+      [table_saw, circular_saw, band_saw, jigsaw, reciprocating_saw, miter_saw]
+    patterns:
+      - id: table_saw_845
+        phrases: ["TABLE SAW"]
+        subtype: table_saw
+        target: table_saw
+        confidence: 0.90
+      - id: circular_saw_845
+        phrases: ["CIRCULAR SAW"]
+        subtype: circular_saw
+        target: circular_saw
+        confidence: 0.90
+      - id: band_saw_845
+        phrases: ["BAND SAW"]
+        subtype: band_saw
+        target: band_saw
+        confidence: 0.90
+      - id: jigsaw_845
+        phrases: ["JIGSAW", "JIG SAW"]
+        subtype: jigsaw
+        target: jigsaw
+        confidence: 0.90
+      - id: reciprocating_saw_845
+        phrases: ["RECIPROCATING SAW", "SABRE SAW", "SABER SAW"]
+        subtype: reciprocating_saw
+        target: reciprocating_saw
+        confidence: 0.90
+      - id: miter_saw_845
+        phrases: ["MITER SAW", "MITRE SAW"]
+        subtype: miter_saw
+        target: miter_saw
+        confidence: 0.90
+
+  # 0847 "Drills, not specified" / 0871 "Power drills or accessories, not specified".
+  847:
+    allowed_targets: [drill_press, drill_portable]
+    patterns: &drill_patterns
+      - id: drill_press_pattern
+        phrases: ["DRILL PRESS"]
+        subtype: drill_press
+        target: drill_press
+        confidence: 0.90
+      - id: drill_portable_pattern
+        phrases: ["CORDLESS DRILL", "HAND DRILL", "PORTABLE DRILL"]
+        subtype: drill_portable
+        target: drill_portable
+        confidence: 0.90
+  871:
+    allowed_targets: [drill_press, drill_portable]
+    patterns: *drill_patterns
+
+  # 0899: "Workshop grinders, buffers or polishers, not specified".
+  899:
+    allowed_targets: [angle_grinder, bench_grinder]
+    patterns:
+      - id: angle_grinder_899
+        phrases: ["ANGLE GRINDER"]
+        subtype: angle_grinder
+        target: angle_grinder
+        confidence: 0.90
+      - id: bench_grinder_899
+        phrases: ["BENCH GRINDER"]
+        subtype: bench_grinder
+        target: bench_grinder
+        confidence: 0.90
+      - id: bare_grinder_899
+        # Bare "GRINDER" with no angle/bench qualifier: subtype only, confidence below the 0.70
+        # refinement gate -- research confirmed real narratives give no distinguishing cue.
+        phrases: ["GRINDER"]
+        subtype: grinder_generic
+        confidence: 0.60
+
+  # 0862: "Manual filing or sanding tools" -- these subtype terms name POWER tools (a
+  # miscoding-vs-narrative mismatch); D-14 has no refined "sander" tool, so this is
+  # subtype-only, final_tool_id always stays the official manual_sanding tool.
+  862:
+    allowed_targets: []
+    patterns:
+      - id: belt_sander_862
+        phrases: ["BELT SANDER"]
+        subtype: belt_sander
+        confidence: 0.75
+      - id: orbital_sander_862
+        phrases: ["ORBITAL SANDER", "PALM SANDER"]
+        subtype: orbital_sander
+        confidence: 0.75
+
+  # 0870: "Awls, chisels or planes". "POWER PLANER" refines to the planer refined-tool;
+  # "HAND PLANE"/"CHISEL" are subtype-only, final_tool_id stays chisel_plane.
+  870:
+    allowed_targets: [planer]
+    patterns:
+      - id: power_planer_870
+        phrases: ["POWER PLANER"]
+        subtype: planer
+        target: planer
+        confidence: 0.90
+      - id: hand_plane_870
+        phrases: ["HAND PLANE"]
+        subtype: hand_plane
+        confidence: 0.75
+      - id: chisel_870
+        phrases: ["CHISEL"]
+        subtype: chisel
+        confidence: 0.75

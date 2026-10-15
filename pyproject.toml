@@ -1,0 +1,51 @@
+[project]
+name = "workshop-injury-intelligence"
+version = "0.1.0"
+description = "Workshop Injury Intelligence: CPSC NEISS ingestion, taxonomy, and analytics"
+requires-python = ">=3.13"
+dependencies = [
+    "streamlit~=1.63.0",
+    "duckdb~=1.5.0",
+    "polars~=1.44.0",
+    "plotly>=6,<7",
+    "pandas>=2.2,<3",
+    "pyarrow>=25,<26",
+    "curl_cffi~=0.16.0",
+    "pyyaml>=6.0.3,<7",
+    "scipy>=1.18,<2",
+]
+
+[project.optional-dependencies]
+llm = [
+    "anthropic>=1.5,<2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4,<9",
+    "ruff~=0.16.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/wii"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+# A local, untracked .planning/ directory may hold working notes with illustrative Python code
+# fences (not source code owned by this package); ruff's code-fence formatting must not touch it.
+extend-exclude = [".planning"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not realdata'"
+markers = [
+    "realdata: reads local data/raw NEISS files; never downloads",
+]

@@ -1,0 +1,378 @@
+name: Refresh NEISS Data
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # 09:17 UTC on the 3rd of every month -- never daily (D-04).
+    - cron: "17 9 3 * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: refresh-data
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    outputs:
+      status: ${{ steps.gate.outputs.status }}
+      latest_year: ${{ steps.gate.outputs.latest_year }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4  # v10.1.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --locked
+      - id: gate
+        run: uv run python scripts/refresh_gate.py check
+      - if: steps.gate.outputs.status == 'current'
+        env:
+          LATEST_YEAR: ${{ steps.gate.outputs.latest_year }}
+        run: echo "NEISS data current (latest year $LATEST_YEAR) -- nothing to refresh"
+
+  refresh:
+    needs: check
+    if: needs.check.outputs.status == 'new_year'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4  # v10.1.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --locked
+      - id: keys
+        env:
+          LATEST_YEAR: ${{ needs.check.outputs.latest_year }}
+        run: uv run python scripts/refresh_gate.py cache-keys --mode restore --latest-year "$LATEST_YEAR"
+      - id: restore_01
+        if: steps.keys.outputs.restore_key_01 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_01 }}
+          key: ${{ steps.keys.outputs.restore_key_01 }}
+      - id: restore_02
+        if: steps.keys.outputs.restore_key_02 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_02 }}
+          key: ${{ steps.keys.outputs.restore_key_02 }}
+      - id: restore_03
+        if: steps.keys.outputs.restore_key_03 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_03 }}
+          key: ${{ steps.keys.outputs.restore_key_03 }}
+      - id: restore_04
+        if: steps.keys.outputs.restore_key_04 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_04 }}
+          key: ${{ steps.keys.outputs.restore_key_04 }}
+      - id: restore_05
+        if: steps.keys.outputs.restore_key_05 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_05 }}
+          key: ${{ steps.keys.outputs.restore_key_05 }}
+      - id: restore_06
+        if: steps.keys.outputs.restore_key_06 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_06 }}
+          key: ${{ steps.keys.outputs.restore_key_06 }}
+      - id: restore_07
+        if: steps.keys.outputs.restore_key_07 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_07 }}
+          key: ${{ steps.keys.outputs.restore_key_07 }}
+      - id: restore_08
+        if: steps.keys.outputs.restore_key_08 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_08 }}
+          key: ${{ steps.keys.outputs.restore_key_08 }}
+      - id: restore_09
+        if: steps.keys.outputs.restore_key_09 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_09 }}
+          key: ${{ steps.keys.outputs.restore_key_09 }}
+      - id: restore_10
+        if: steps.keys.outputs.restore_key_10 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_10 }}
+          key: ${{ steps.keys.outputs.restore_key_10 }}
+      - id: restore_11
+        if: steps.keys.outputs.restore_key_11 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_11 }}
+          key: ${{ steps.keys.outputs.restore_key_11 }}
+      - id: restore_12
+        if: steps.keys.outputs.restore_key_12 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_12 }}
+          key: ${{ steps.keys.outputs.restore_key_12 }}
+      - id: restore_13
+        if: steps.keys.outputs.restore_key_13 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_13 }}
+          key: ${{ steps.keys.outputs.restore_key_13 }}
+      - id: restore_14
+        if: steps.keys.outputs.restore_key_14 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_14 }}
+          key: ${{ steps.keys.outputs.restore_key_14 }}
+      - id: restore_15
+        if: steps.keys.outputs.restore_key_15 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_15 }}
+          key: ${{ steps.keys.outputs.restore_key_15 }}
+      - id: restore_16
+        if: steps.keys.outputs.restore_key_16 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_16 }}
+          key: ${{ steps.keys.outputs.restore_key_16 }}
+      - id: restore_17
+        if: steps.keys.outputs.restore_key_17 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_17 }}
+          key: ${{ steps.keys.outputs.restore_key_17 }}
+      - id: restore_18
+        if: steps.keys.outputs.restore_key_18 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_18 }}
+          key: ${{ steps.keys.outputs.restore_key_18 }}
+      - id: restore_19
+        if: steps.keys.outputs.restore_key_19 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_19 }}
+          key: ${{ steps.keys.outputs.restore_key_19 }}
+      - id: restore_20
+        if: steps.keys.outputs.restore_key_20 != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.keys.outputs.restore_path_20 }}
+          key: ${{ steps.keys.outputs.restore_key_20 }}
+      # Phase 2 realdata regression compares against the pre-regeneration committed release
+      # (tests/realdata/test_phase2_outputs_realdata.py reads WII_PREV_ENRICHMENT).
+      - name: Snapshot previous committed enrichment for realdata comparison
+        run: |
+          mkdir -p "$RUNNER_TEMP/wii-prev"
+          git show HEAD:data/processed/narrative_enrichment.parquet > "$RUNNER_TEMP/wii-prev/narrative_enrichment.parquet"
+          echo "WII_PREV_ENRICHMENT=$RUNNER_TEMP/wii-prev/narrative_enrichment.parquet" >> "$GITHUB_ENV"
+      # Online only (never --offline): keeps latest_year_detection real for refresh_gate verify
+      # (Phase 4 04-05 finding). Failures here (e.g. an Akamai block on the runner, D-05 A1) are
+      # never suppressed or retried -- stderr carries the manual-drop fallback instructions and
+      # the job fails loudly.
+      - run: uv run python scripts/sync_neiss.py --latest
+      - env:
+          LATEST_YEAR: ${{ needs.check.outputs.latest_year }}
+        run: uv run python scripts/refresh_gate.py verify --latest-year "$LATEST_YEAR"
+      - run: uv run python scripts/validate_classifications.py
+      - run: uv run pytest -q
+      - run: uv run pytest -m realdata -q
+      - id: savekeys
+        env:
+          LATEST_YEAR: ${{ needs.check.outputs.latest_year }}
+        run: uv run python scripts/refresh_gate.py cache-keys --mode save --latest-year "$LATEST_YEAR"
+      - id: save_01
+        if: steps.restore_01.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_01 }}
+          key: ${{ steps.savekeys.outputs.save_key_01 }}
+      - id: save_02
+        if: steps.restore_02.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_02 }}
+          key: ${{ steps.savekeys.outputs.save_key_02 }}
+      - id: save_03
+        if: steps.restore_03.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_03 }}
+          key: ${{ steps.savekeys.outputs.save_key_03 }}
+      - id: save_04
+        if: steps.restore_04.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_04 }}
+          key: ${{ steps.savekeys.outputs.save_key_04 }}
+      - id: save_05
+        if: steps.restore_05.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_05 }}
+          key: ${{ steps.savekeys.outputs.save_key_05 }}
+      - id: save_06
+        if: steps.restore_06.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_06 }}
+          key: ${{ steps.savekeys.outputs.save_key_06 }}
+      - id: save_07
+        if: steps.restore_07.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_07 }}
+          key: ${{ steps.savekeys.outputs.save_key_07 }}
+      - id: save_08
+        if: steps.restore_08.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_08 }}
+          key: ${{ steps.savekeys.outputs.save_key_08 }}
+      - id: save_09
+        if: steps.restore_09.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_09 }}
+          key: ${{ steps.savekeys.outputs.save_key_09 }}
+      - id: save_10
+        if: steps.restore_10.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_10 }}
+          key: ${{ steps.savekeys.outputs.save_key_10 }}
+      - id: save_11
+        if: steps.restore_11.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_11 }}
+          key: ${{ steps.savekeys.outputs.save_key_11 }}
+      - id: save_12
+        if: steps.restore_12.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_12 }}
+          key: ${{ steps.savekeys.outputs.save_key_12 }}
+      - id: save_13
+        if: steps.restore_13.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_13 }}
+          key: ${{ steps.savekeys.outputs.save_key_13 }}
+      - id: save_14
+        if: steps.restore_14.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_14 }}
+          key: ${{ steps.savekeys.outputs.save_key_14 }}
+      - id: save_15
+        if: steps.restore_15.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_15 }}
+          key: ${{ steps.savekeys.outputs.save_key_15 }}
+      - id: save_16
+        if: steps.restore_16.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_16 }}
+          key: ${{ steps.savekeys.outputs.save_key_16 }}
+      - id: save_17
+        if: steps.restore_17.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_17 }}
+          key: ${{ steps.savekeys.outputs.save_key_17 }}
+      - id: save_18
+        if: steps.restore_18.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_18 }}
+          key: ${{ steps.savekeys.outputs.save_key_18 }}
+      - id: save_19
+        if: steps.restore_19.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_19 }}
+          key: ${{ steps.savekeys.outputs.save_key_19 }}
+      - id: save_20
+        if: steps.restore_20.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ steps.savekeys.outputs.save_path_20 }}
+          key: ${{ steps.savekeys.outputs.save_key_20 }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: refreshed-data
+          path: |
+            data/processed
+            data/metadata
+            docs/classifier_validation.md
+          if-no-files-found: error
+          retention-days: 1
+      - if: failure()
+        run: |
+          echo "### Refresh failed -- no PR opened" >> "$GITHUB_STEP_SUMMARY"
+          echo "See README.md 'Refreshing NEISS data' for the local/manual refresh path." >> "$GITHUB_STEP_SUMMARY"
+
+  open-pr:
+    needs: [check, refresh]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rm -rf data/processed data/metadata
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: refreshed-data
+          path: .
+      - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
+        with:
+          base: main
+          branch: data-refresh/neiss-${{ needs.check.outputs.latest_year }}
+          delete-branch: true
+          add-paths: |
+            data/processed/**
+            data/metadata/**
+            docs/classifier_validation.md
+          commit-message: "data: refresh NEISS to ${{ needs.check.outputs.latest_year }}"
+          title: "Data refresh: NEISS ${{ needs.check.outputs.latest_year }}"
+          body: |
+            Automated annual NEISS data refresh (OPS-03).
+
+            Latest available year: ${{ needs.check.outputs.latest_year }}
+
+            Gates passed on the `refresh` job before this PR was opened:
+            - `refresh_gate.py verify` (QA not aborted, real latest-year detection, full
+              20-year window ending at the detected year)
+            - `scripts/validate_classifications.py`
+            - full synthetic test suite (`uv run pytest -q`)
+            - realdata regression suite (`uv run pytest -m realdata -q`)
+
+            This PR was opened with the default `GITHUB_TOKEN`, so it does **not** automatically
+            trigger `ci.yml`. Before merging, run CI on this branch manually via the CI
+            workflow's `workflow_dispatch` trigger.

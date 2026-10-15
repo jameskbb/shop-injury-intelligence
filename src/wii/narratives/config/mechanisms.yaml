@@ -1,0 +1,222 @@
+version: 1
+
+# D-15: fixed priority order, highest first. Must equal schema.MECHANISM_PRIORITY exactly --
+# asserted in tests/narratives/test_mechanisms_ppe.py.
+priority:
+  - kickback_ejection
+  - entanglement
+  - fastener_discharge
+  - flying_debris_fb
+  - pinch_crush
+  - electrical_burn
+  - fall_trip
+  - loss_of_tool_control
+  - workpiece_slip
+  - direct_cutting_contact
+  - maintenance_setup
+  - other
+  - unknown
+
+# Direct phrase-match categories: any phrase present (and not negated) tags the category.
+simple_phrase_categories:
+  kickback_ejection:
+    - "KICKBACK"
+    - "KICKED BACK"
+    - "KICK BACK"
+  fastener_discharge:
+    - "NAIL GUN WENT OFF"
+    - "NAILER WENT OFF"
+    - "SHOT NAIL"
+    - "DISCHARGED NAIL"
+    - "GUN DISCHARGED"
+  flying_debris_fb:
+    - "FLEW OFF"
+    - "FLYING DEBRIS"
+    - "FB EYE"
+    - "SOMETHING FLEW"
+    - "SOMETHING IN EYE"
+    - "PIECE FLEW"
+    - "FOREIGN BODY"
+    - "DEBRIS IN EYE"
+  electrical_burn:
+    - "ELECTRIC SHOCK"
+    - "ELECTROCUTED"
+    - "ELECTRICAL BURN"
+    - "SHOCKED BY"
+  maintenance_setup:
+    - "CHANGING BLADE"
+    - "CHANGING BIT"
+    - "CLEANING TOOL"
+    - "CLEANING SAW"
+    - "ADJUSTING GUARD"
+    - "ADJUSTING BLADE"
+    - "CLEARING JAM"
+  direct_cutting_contact:
+    - "LACERATION FROM"
+    - "CUT FINGER"
+    - "CUT HAND"
+    - "CUT HIS"
+    - "CUT HER"
+    - "STRUCK BY BLADE"
+  other:
+    - "STRUCK BY"
+    - "HIT BY"
+    - "BURNED BY"
+
+# Ambiguous verb cues disambiguated by the nearest preceding subject noun (Pitfall 4/research).
+# `classify.py` looks at the token immediately before the cue phrase.
+subject_disambiguated:
+  SLIPPED:
+    tool_category: loss_of_tool_control
+    other_category: workpiece_slip
+    tool_subject_terms: [SAW, DRILL, TOOL, BLADE, GRINDER, SANDER, ROUTER]
+    other_subject_terms: [HAND, FINGER, WOOD, BOARD, MATERIAL, PIECE]
+  CAUGHT:
+    tool_category: entanglement
+    other_category: pinch_crush
+    tool_subject_terms: [HAIR, GLOVE, SLEEVE, SHIRT, CLOTHING, JEWELRY, RING]
+    other_subject_terms: [FINGER, HAND, THUMB]
+
+# fall_trip requires a fall/trip cue AND a co-occurring tool-OPERATION link in the same
+# narrative (Pitfall 5) -- a bare tool-noun mention ("TRIPPED OVER A SAW") is NOT enough,
+# because that's exactly the incidental-mention pattern research found; an -ING operation verb
+# is required to show the tool was actually in use at the time.
+fall_trip:
+  phrases: ["FELL", "TRIPPED"]
+  link_terms:
+    [SAWING, CUTTING, GRINDING, DRILLING, SANDING, ROUTING, PLANING, NAILING, USING, OPERATING]
+
+body_part_terms:
+  [FINGER, THUMB, HAND, WRIST, ARM, EYE, FACE, LEG, KNEE, FOOT, TOE, HEAD, CHEST, BACK]
+
+# rules-1.1.0 mechanism improvement: generic cutting-injury verbs, recognized as
+# direct_cutting_contact ONLY when a cutting-tool context term also appears somewhere in the
+# narrative ("on cutting-tool cases") -- weighted at MODERATE confidence (below the 0.75 bare-
+# word tier used elsewhere) because these verbs are broader/more error-prone than the exact
+# multi-word phrases in simple_phrase_categories above. Negation-aware via match_phrases.
+cutting_verbs:
+  confidence: 0.60
+  phrases:
+    - "LACERATED"
+    - "LACERATION"
+    - "LACERATING"
+    - "CUT"
+    - "SLICED"
+    - "SLICING"
+    - "AMPUTATED"
+    - "AMPUTATION"
+    - "NICKED"
+    - "CAUGHT BY BLADE"
+    - "CAUGHT ON BLADE"
+  tool_context_terms:
+    [SAW, BLADE, CHISEL, KNIFE, CUTTER, SHEARS, ROUTER, PLANER, JOINTER]
+
+# D-14: maintenance/setup context classification. Deliberately a separate top-level section from
+# simple_phrase_categories above -- mechanism scoring (priority/simple_phrase_categories/
+# subject_disambiguated/fall_trip/cutting_verbs) never reads this, so primary_mechanism cannot
+# change as a side effect of this extension (T-04-09). Tracer scope (Task 1): blade_change only;
+# remaining categories are populated from real committed narratives in Task 3.
+maintenance_context:
+  priority:
+    - jam_clearing
+    - blade_change
+    - bit_change
+    - adjustment
+    - cleaning
+    - material_setup
+    - other_maintenance
+  tool_context_terms:
+    [SAW, BLADE, DRILL, BIT, GRINDER, SANDER, ROUTER, PLANER, JOINTER, LATHE, NAILER,
+     "NAIL GUN", TOOL, MACHINE]
+  phrases:
+    blade_change:
+      - "CHANGING THE BLADE"
+      - "CHANGING A BLADE"
+      - "CHANGING BLADE"
+      - "CHANGING SAW BLADE"
+      - "REPLACING THE BLADE"
+      - "REPLACING A BLADE"
+      - "REPLACING BLADE"
+      - "REPLACING SAW BLADE"
+    bit_change:
+      - "CHANGING THE BIT"
+      - "CHANGING A BIT"
+      - "CHANGING BIT"
+      - "CHANGING DRILL BIT"
+      - "REPLACING THE BIT"
+      - "REPLACING A BIT"
+      - "REPLACING BIT"
+      - "REPLACING DRILL BIT"
+    jam_clearing:
+      - "CLEARING A JAM"
+      - "CLEARING JAM"
+      - "UNJAMMING"
+      - "REMOVING JAMMED"
+    cleaning:
+      - "CLEANING HIS SAW"
+      - "CLEANING HER SAW"
+      - "CLEANING THE SAW"
+      - "CLEANING HIS DRILL"
+      - "CLEANING HER DRILL"
+      - "CLEANING THE DRILL"
+      - "CLEANING HIS TOOL"
+      - "CLEANING HER TOOL"
+      - "CLEANING THE TOOL"
+      - "CLEANING HIS BLADE"
+      - "CLEANING HER BLADE"
+      - "CLEANING THE BLADE"
+      - "CLEANING HIS MACHINE"
+      - "CLEANING HER MACHINE"
+      - "CLEANING THE MACHINE"
+      - "CLEANING HIS GRINDER"
+      - "CLEANING HER GRINDER"
+      - "CLEANING THE GRINDER"
+    adjustment:
+      - "ADJUSTING THE FENCE"
+      - "ADJUSTING A FENCE"
+      - "ADJUSTING THE GUARD"
+      - "ADJUSTING A GUARD"
+      - "ADJUSTING THE BLADE"
+      - "ADJUSTING A BLADE"
+      - "ADJUSTING THE DEPTH"
+      - "TIGHTENING"
+    material_setup:
+      - "SETTING UP THE CUT"
+      - "SETTING UP THE SAW"
+      - "LOADING THE NAIL GUN"
+      - "LOADING A NAIL GUN"
+      - "LOADING THE NAILER"
+      - "LOADING A NAILER"
+      - "CLAMPING THE WORKPIECE"
+      - "MEASURING"
+    other_maintenance:
+      - "SHARPENING"
+      - "REPAIRING A SAW"
+      - "REPAIRING THE SAW"
+      - "REPAIRING A DRILL"
+      - "REPAIRING THE DRILL"
+      - "REPAIRING A TOOL"
+      - "REPAIRING THE TOOL"
+      - "OILING"
+      - "FIXING A SAW"
+      - "FIXING THE SAW"
+      - "FIXING A TOOL"
+      - "FIXING THE TOOL"
+
+# D-14: literal, explicit-only unplugged/plugged-in mention. Never inferred from absence; a
+# negated match is discarded before scoring (see classify.py::_classify_power_state). Phrases are
+# additive-only observed variants (D-14: "never add a phrase that states an omission") -- e.g.
+# real narratives containing "FORGOT TO UNPLUG" are correctly NOT covered here, since that states
+# an omission, not an explicit unplugged state.
+power_state:
+  unplugged:
+    - "UNPLUGGED"
+    - "WAS UNPLUGGED"
+    - "HAD UNPLUGGED"
+    - "UNPLUGGED THE"
+  plugged_in:
+    - "PLUGGED IN"
+    - "STILL PLUGGED IN"
+    - "WAS PLUGGED IN"
+    - "WAS STILL PLUGGED"
+    - "WHILE PLUGGED IN"

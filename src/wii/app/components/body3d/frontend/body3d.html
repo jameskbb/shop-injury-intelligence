@@ -1,0 +1,27 @@
+<div class="b3d" data-state="loading">
+  <div class="b3d-head">
+    <p class="b3d-tool" hidden></p>
+    <p class="b3d-readout" hidden></p>
+  </div>
+  <div class="b3d-stage" aria-label="Interactive 3D body injury map" role="img">
+    <div class="b3d-views" role="group" aria-label="Camera view">
+      <button type="button" class="b3d-btn" data-view="body">Whole body</button>
+      <button type="button" class="b3d-btn" data-view="hand">Hand</button>
+    </div>
+    <p class="b3d-empty" hidden>
+      No region clears the reporting floor for this selection within the NEISS reporting
+      population over the selected period. Widen the year range or the filters to draw the plate.
+    </p>
+    <p class="b3d-finger-note" hidden>
+      NEISS records fingers as a single category, so all fingers share one value.
+    </p>
+    <p class="b3d-fallback" hidden>
+      Couldn't start the 3D viewer; showing the flat body map instead.
+    </p>
+  </div>
+  <div class="b3d-foot">
+    <p class="b3d-hint">Drag to turn. Scroll or pinch to zoom. Tap or click a body area to read
+      it, again to filter.</p>
+  </div>
+  <div class="b3d-tip" role="tooltip" hidden></div>
+</div>

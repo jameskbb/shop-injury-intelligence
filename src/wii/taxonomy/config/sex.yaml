@@ -1,0 +1,21 @@
+# Sex codes (D-15). Transcribed verbatim from the NEISS Coding Manual, January 2025 (rev.1),
+# page 14. The full 2006-2025 corpus contains only {0, 1, 2} (verified,
+# research/NEISS-REFERENCE.md); a transient "3-Non-Binary"/"Gender Diverse" code existed in some
+# intermediate manual revisions but was eliminated as of the January 2025 (rev.1) manual and does
+# not appear in this project's data window.
+version: 1
+source:
+  document: "NEISS Coding Manual, January 2025 (rev.1)"
+  url: "https://www.cpsc.gov/s3fs-public/JANUARY-2025-NEISS-CPSC-only-Coding-Manual-Rev-1.pdf"
+  pages: "14"
+
+codes:
+  0:
+    label: "Unknown"
+    manual_page: 14
+  1:
+    label: "Male"
+    manual_page: 14
+  2:
+    label: "Female"
+    manual_page: 14
