@@ -7,7 +7,8 @@ Profiles is scoped to exactly one tool (`filters.current_filter(tools_override=(
 the same chart there would be a single-row strip -- a worse rendering of the INJURY TREND line
 chart that page already carries. Overview is the only page holding a workshop-wide, multi-tool
 filter, and it already answers "which tools" (landscape, ranked bars); the heatmap slots directly
-after the ranked bars to answer "and when", reusing the bars' own ranking order.
+after the ranked bars to answer "and when", ranked over the full available record rather than
+the sidebar's year window.
 """
 
 from __future__ import annotations
@@ -284,8 +285,8 @@ def _render_temporal_heatmap(flt: CaseFilter) -> None:
         )
     if omitted_tools:
         caption_parts.append(
-            f"{omitted_tools} lower-burden tool(s) are not shown; the full ranking is on the "
-            "Tool Comparison and Tool Profiles pages."
+            f"{omitted_tools} lower-burden tool(s) are not shown. The chart above ranks tools "
+            "for the selected year range; this heatmap ranks them over the full record."
         )
     st.caption(" ".join(caption_parts))
     st.plotly_chart(build_temporal_heatmap(df), config=theme.PLOTLY_CONFIG, width="stretch")

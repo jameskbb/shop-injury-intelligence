@@ -101,7 +101,8 @@ class RegionValue:
     state: str  # stability_badge.STATE_STABLE | STATE_LIMITED | STATE_SUPPRESSED
     raw_n: int
     # D-04 tooltip extensions (Body Map only) -- None means "the caller didn't supply this field"
-    # (Phase 3 callers/output stay byte-identical); the Body Map page always passes "—" instead
+    # (Phase 3 callers/output stay byte-identical); the Body Map page always passes "Not reportable"
+    # instead
     # of None when a field has no stable value, per D-04.
     share_display: str | None = None
     # What the share is OF. None keeps the tool-scoped wording; the all-tools view passes

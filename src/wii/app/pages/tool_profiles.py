@@ -260,7 +260,7 @@ def _mechanism_kpi_card(mech_df: pl.DataFrame) -> KpiCard:
     if candidates.height == 0:
         return KpiCard(
             label="Primary mechanism",
-            value="—",
+            value="Not reportable",
             caption="No stable mechanism data for this tool",
         )
     top = candidates.sort("value", descending=True).row(0, named=True)
@@ -320,7 +320,8 @@ def _render_unreportable(tool_label: str, raw_n: int, flt: CaseFilter, basis: st
     suppressed.
 
     Until now the only bail-out was `raw_n == 0`; one sample case was enough to render the whole
-    page, so Shaper (9 cases in 20 years) drew eight "—" KPIs, four empty charts and a body plate
+    page, so Shaper (9 cases in 20 years) drew eight unavailable KPIs, four empty charts and a body
+    plate
     captioned "22 of 22 body regions are below the reporting floor". Two screens of furniture
     around no number is worse than no page: it reads as a broken dashboard rather than as an
     honest absence, and it buries the one line that actually explains what happened.
@@ -480,7 +481,8 @@ def render() -> None:
     if overall is None or overall.raw_n == 0:
         empty_state(filters.filter_summary())
         return
-    # A suppressed headline means every section below it is "—" as well: the KPI strip, all four
+    # A suppressed headline means every section below it is "Not reportable" as well: the KPI strip,
+    # all four
     # charts and the body plate are all driven by this same estimate. Say so once, with the lever.
     if resolve(overall, basis).state == STATE_SUPPRESSED:
         _render_unreportable(tool_label, overall.raw_n, flt, basis)

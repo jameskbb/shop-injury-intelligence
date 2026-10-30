@@ -46,7 +46,7 @@ import polars as pl
 from wii.app import theme
 from wii.app.charts.trend import SCHEMA_CHANGE_CAPTION, SCHEMA_CHANGE_YEAR
 from wii.app.components.stability_badge import LIMITED_SAMPLE_LABEL, SUPPRESSED_LABEL
-from wii.app.theme import CONSTRUCTION, GRAPHITE_SOFT, SEQUENTIAL_SCALE, chart_note
+from wii.app.theme import CONSTRUCTION, GRAPHITE_SOFT, SEQUENTIAL_SCALE
 
 __all__ = [
     "SCHEMA_CHANGE_CAPTION",
@@ -76,6 +76,8 @@ YEAR_RANGE_NOTE = (
 ESTIMATE_LABEL = "Estimated U.S. ER-treated injuries"
 COLORBAR_TITLE = "Estimated injuries<br>per year (log)"
 STABLE_LABEL = "Stable"
+LIMITED_LEGEND_LABEL = "Limited sample"
+SUPPRESSED_LEGEND_LABEL = "Not reportable"
 
 # The CPSC hard floor (`wii.metrics.stability.EST_LT_1200`): no displayed cell is ever below it,
 # so the color scale may start there without hiding anything.
@@ -111,19 +113,19 @@ def _state_label(state: str) -> str:
 
 def _hover_text(tool_label: str, year: int, row: dict | None) -> str:
     """Estimate + 95% CI + raw sample N with the standing "(not a national count)" caveat +
-    the cell's stability state. A suppressed cell shows "—" for the estimate: the resolved row
-    carries no value at all, so no plausible number can leak into a tooltip."""
+    the cell's stability state. A suppressed cell shows "Not reportable" for the estimate:
+    the resolved row carries no value, so no plausible number can leak into a tooltip."""
     if row is None or row["state"] == _STATE_SUPPRESSED or row["value"] is None:
         raw_n = row["raw_n"] if row is not None else 0
         return (
-            f"{tool_label}, {year}<br>{ESTIMATE_LABEL}: —"
+            f"{tool_label}, {year}<br>{ESTIMATE_LABEL}: Not reportable"
             f"<br>{raw_n:,} sample cases (not a national count)"
             f"<br>{SUPPRESSED_LABEL}"
         )
     if row["ci_low"] is not None and row["ci_high"] is not None:
         ci_text = f"{row['ci_low']:,.0f}–{row['ci_high']:,.0f}"
     else:
-        ci_text = "—"
+        ci_text = "Not reportable"
     return (
         f"{tool_label}, {year}<br>{ESTIMATE_LABEL}: {row['value']:,.0f}"
         f"<br>95% CI: {ci_text}"
@@ -138,6 +140,8 @@ def _colorbar_ticks(zmin: float, zmax: float) -> tuple[list[float], list[str]]:
     values = [v for v in _TICK_LADDER if zmin <= math.log10(v) <= zmax]
     if len(values) < 2:
         values = [10**zmin, 10**zmax]
+    elif len(values) > 3:
+        values = [values[0], values[len(values) // 2], values[-1]]
     return [math.log10(v) for v in values], [f"{v:,.0f}" for v in values]
 
 
@@ -251,12 +255,18 @@ def build_temporal_heatmap(df: pl.DataFrame) -> go.Figure:
             xgap=1,
             ygap=1,
             colorbar={
-                "title": COLORBAR_TITLE,
+                "title": {"text": COLORBAR_TITLE, "side": "bottom"},
+                "tickangle": 0,
+                "orientation": "h",
+                "x": 0.5,
+                "xanchor": "center",
+                "y": -0.15,
+                "yanchor": "top",
                 "tickvals": tickvals,
                 "ticktext": ticktext,
                 "thickness": 10,
                 "outlinewidth": 0,
-                "len": 0.9,
+                "len": 1.0,
             },
         )
     )
@@ -267,7 +277,7 @@ def build_temporal_heatmap(df: pl.DataFrame) -> go.Figure:
                 limited_x,
                 limited_y,
                 limited_hover,
-                name=LIMITED_SAMPLE_LABEL,
+                name=LIMITED_LEGEND_LABEL,
                 symbol="circle-open",
                 color=CONSTRUCTION,
             )
@@ -278,34 +288,54 @@ def build_temporal_heatmap(df: pl.DataFrame) -> go.Figure:
                 suppressed_x,
                 suppressed_y,
                 suppressed_hover,
-                name=SUPPRESSED_LABEL,
+                name=SUPPRESSED_LEGEND_LABEL,
                 symbol="x-thin",
                 color=GRAPHITE_SOFT,
             )
         )
 
+    # Keep complete years in the hover while limiting labels to a readable mobile budget.
+    # The endpoints remain visible even when the last interval is shorter.
+    tick_step = max(1, math.ceil((len(years) - 1) / 2))
+    tick_years = years[::tick_step]
+    if tick_years[-1] != years[-1]:
+        tick_years.append(years[-1])
     fig.update_xaxes(
         title="Treatment year",
-        dtick=1,
+        tickmode="array",
+        tickvals=tick_years,
+        ticktext=[str(year) for year in tick_years],
+        tickangle=0,
         range=[min(years) - 0.5, max(years) + 0.5],
         showgrid=False,
     )
-    fig.update_yaxes(autorange="reversed", showgrid=False)
-    # style_chart sets automargin, so the longest tool label ("Portable Circular Power Saw")
-    # grows the left margin instead of being clipped to "...ortable Circular Power Saw". Height
-    # tracks the row count so every tool keeps a readable band.
-    theme.style_chart(fig, height=max(320, 26 * len(tool_order) + 140), grid="none", legend=True)
+    # Bound the label margin so a phone keeps room for the data. Full names remain in hover
+    # and as category identities, even when two shortened tick labels happen to look alike.
+    fig.update_yaxes(
+        autorange="reversed",
+        showgrid=False,
+        tickmode="array",
+        tickvals=y_labels,
+        ticktext=[label if len(label) <= 24 else label[:23].rstrip() + "…" for label in y_labels],
+    )
+    # Height tracks the row count so every tool keeps a readable band.
+    theme.style_chart(
+        fig,
+        height=max(440, 26 * len(tool_order) + 240),
+        margin={"l": 150, "r": 20, "t": 90, "b": 140},
+        grid="none",
+        legend=True,
+    )
+    fig.update_yaxes(automargin=False)
+    fig.update_xaxes(automargin=False)
+    fig.update_layout(legend={"x": 0, "xanchor": "left", "y": 1.04})
 
     if min(years) < SCHEMA_CHANGE_YEAR <= max(years):
-        fig.add_vline(x=SCHEMA_CHANGE_YEAR - 0.5, line_dash="dot", line_color=CONSTRUCTION)
-        fig.add_annotation(
-            **chart_note(
-                "2019 coding change",
-                x=SCHEMA_CHANGE_YEAR - 0.5,
-                xanchor="left",
-                y=1.10,
-                yref="paper",
-                yanchor="bottom",
-            )
+        fig.add_vline(
+            x=SCHEMA_CHANGE_YEAR - 0.5,
+            line_dash="dot",
+            line_color=CONSTRUCTION,
+            name="2019 coding change",
+            showlegend=True,
         )
     return fig

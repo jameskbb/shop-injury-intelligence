@@ -199,11 +199,10 @@ else: sentence case throughout, enforced by a test that scans every heading on a
 2. **Table column headers** (`.wii-comparison-strip th`). Small caps on a column header is a
    conventional table device, not an eyebrow, and it is the right register for a cut-list.
 
-Everything that failed this test has been fixed at the source rather than with CSS, so the real
-text is what screen readers and the guardrail scanner see: My Shop's four section headings, and the
-Signals tier names, which turned out to be capitalised in `insights.yaml`, meaning the shouting had
-reached the data itself. The badge also lost its `letter-spacing: 0.08em`; with the caps gone, the
-tracking was the other half of the tell.
+Headings use sentence case at the source rather than relying on CSS, so screen readers and the
+guardrail scanner receive the same copy. Signals groups findings by kind without strength badges
+or tiers. Its ordering describes measured differences and never suggests statistical significance
+or consequences across categories.
 
 ---
 

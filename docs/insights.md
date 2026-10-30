@@ -13,9 +13,9 @@ or number is hard-coded in `insights.py`.
 | `min_raw_n` | 50 | Minimum raw sample-case count required of **every** compared cell. A cell with raw N 49 is excluded; 50 is included (`>=`). |
 | `share_ratio_min` | 1.5 | A tool's share must be at least this many **times** the baseline/other-tool's share for `severity`/`disproportionate`/`pairwise_comparison` insights. Ratio exactly 1.5 passes. |
 | `share_pp_min` | 5.0 | A tool's share must also be at least this many **percentage points** higher than the baseline/other-tool's share. 5.0 pp exactly passes; 4.99 pp fails. Both `share_ratio_min` and `share_pp_min` must pass together (AND, not OR). |
-| `burden_outcome_ratio_min` | 1.5 | For `burden_vs_share`: (tool's share of a severe outcome's workshop-wide total) / (tool's share of overall burden) must be `>=` this ratio. |
+| `burden_outcome_ratio_min` | 1.5 | For `burden_vs_share`: (tool's share of a severe outcome's current-filter total) / (tool's share of overall burden) must be `>=` this ratio. |
 | `trend_pct_min` | 20.0 | Minimum `|percent change|` between the latest-N-year and prior-N-year annual averages for a `trend` insight. 20.0% exactly passes (when the CI gate below also passes). |
-| `trend_window_years` | 3 | Size (in years) of each of the two compared windows. |
+| `trend_window_years` | 3 | Size (in years) of each compared window, shared by insight trends and KPI comparisons. |
 | `trend_require_nonoverlapping_ci` | true | When true, a `trend` insight also requires the two windows' 95% CIs to not overlap. |
 | `max_cards` | 5 | Maximum number of insights returned by `generate_insights`/`compare_tools`, after ranking. |
 | `min_cards_for_section` | 3 | Below this many passing insights, the Overview page shows only the passing ones (possibly zero) plus a one-line note, **never padded** with weaker statements that didn't clear the thresholds above. |
@@ -46,7 +46,7 @@ shares pass the same raw `share` float through too (`_mechanism_disproportionate
 A comparison is only generated when **every** cell involved is `stability_badge.STATE_STABLE`
 (never `limited` or `suppressed`, because comparing a
 basis-mismatched, limited, or suppressed cell) **and** has `raw_n >= min_raw_n`. This is checked
-independently for each side of a comparison (both a tool's cell and the workshop baseline cell
+independently for each side of a comparison (both a tool's cell and the current-filter baseline cell
 for `severity`/`disproportionate`; both windows for `trend`; both tools for
 `pairwise_comparison`).
 
@@ -60,11 +60,11 @@ came from, so the same threshold gates and "higher than baseline" wording apply 
 - **Diagnosis** and **body region** come from `severity_metrics.yaml` metrics of kind
   `diagnosis_any` / `body_rollup_any`, via `src/wii/app/data.py`'s
   `_severity_and_disproportionate_dims`. Each metric's within-tool share (`by="tool"`) is compared
-  against the workshop-wide share (`by="all"`) of the same diagnosis/body-region metric.
+  against the current-filter share (`by="all"`) of the same diagnosis/body-region metric.
 - **Primary mechanism** comes from `_mechanism_disproportionate_dims`: for each of the 11
   candidate `theme.MECHANISM_COLORS` keys (13 total, minus `unknown`/`other`; see below), the
   tool's within-tool share `share_by(flt, CaseFilter(mechanisms=(key,)), by="tool")` is compared
-  against the all-workshop share `share_by(flt, CaseFilter(mechanisms=(key,)), by="all")` of that
+  against the current-filter share `share_by(flt, CaseFilter(mechanisms=(key,)), by="all")` of that
   same mechanism. This is the SAME basis Tool Profiles' mechanism profile
   (`mechanism_profile_frame`) and Comparison's mechanism fingerprint columns
   (`_comparison_mechanism_dims`) already use.
@@ -98,13 +98,26 @@ total, the same order of magnitude as the existing diagnosis/body-region dimensi
 
 ## Ranking rule
 
-Candidates from every kind are pooled and ranked by `effect_size` descending (ratio for
-`severity`/`disproportionate`/`burden_vs_share`/`baseline_comparison`/`pairwise_comparison`,
-`|percent change|` for `trend`), then capped at `max_cards`. Effect-size scale differs across
-kinds by design (a ratio and a percentage are not directly comparable); this is a documented
-simplification, not a normalized composite score. Ties break deterministically by tool label (or
-`tool_id`, or `""` for workshop-wide insights), then by `kind`, so re-running the engine on
-identical input always produces the identical card order.
+Candidates are ranked by `effect_size` descending **within each kind only**. Ratios and absolute
+percentage changes have different units and attainable ranges. They are descriptive differences,
+not statistical significance or consequence scores, including within a kind. Ties break by tool
+ID and statement text for deterministic results independent of input order.
+
+A bounded selection takes one candidate from each kind in fixed order (outcome mix, category mix,
+disproportionate contribution, multi-year shift, volume vs peer average), then repeats until
+`max_cards` is reached or candidates run out. The kind order is presentation order, not evidence
+ranking. Overview uses this same selection. Signals selects up to its own `signals.max_cards`
+limit and displays the selected findings in kind groups. No strength tiers or strength bars are
+assigned.
+
+All share baselines use the current filters, including family and tool restrictions, and are
+labelled as current-filter baselines. They are not necessarily workshop-wide.
+
+The volume comparison always uses annual-average values and annual-average reportability for
+both peer membership and the displayed finding, regardless of the page's basis toggle. Its mean
+includes only stable tools meeting `min_raw_n` under the current filters. This keeps peer
+membership and the comparison ratio constant when switching between annual average and period
+total. It remains a burden comparison with no exposure denominator.
 
 ## Wording guardrails
 

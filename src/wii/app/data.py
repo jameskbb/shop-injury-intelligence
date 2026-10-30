@@ -301,14 +301,14 @@ def anatomy_snapshot_frame(flt: CaseFilter, basis: str) -> dict[str, RegionValue
             values[region_id] = RegionValue(
                 label=row["label"],
                 value=None,
-                display_value="—",
+                display_value="Not reportable",
                 state=stability_badge.STATE_SUPPRESSED,
                 raw_n=0,
             )
             continue
         resolved = stability_badge.resolve(region_row, basis)
         share = resolved.value / total_resolved.value if resolved.value is not None else None
-        display = stability_badge.format_share(share) if share is not None else "—"
+        display = stability_badge.format_share(share) if share is not None else "Not reportable"
         values[region_id] = RegionValue(
             label=row["label"],
             value=share,
@@ -362,7 +362,6 @@ _MECHANISM_LABELS: dict[str, str] = {
 # burden_vs_share kind -- bounded to keep insight_frames()'s extra query count small (2 queries
 # per curated metric) rather than one pair per severity_metrics.yaml entry.
 _BURDEN_OUTCOME_METRIC_IDS = ("amputation", "hand_finger")
-_TREND_WINDOW_YEARS = 3
 
 _METRIC_LABELS: dict[str, str] = {
     "released": "released-without-treatment share",
@@ -439,7 +438,7 @@ def _severity_and_disproportionate_dims(
         if baseline_rows.height == 0:
             continue
         baseline_cell = _tool_cell_from_share_row(
-            baseline_rows.row(0, named=True), label="All tools (workshop-wide)"
+            baseline_rows.row(0, named=True), label="All tools under current filters"
         )
         tool_rows = by_tool_df.filter(by_tool_df["metric_id"] == metric_id)
         by_tool = {
@@ -478,7 +477,7 @@ def _mechanism_disproportionate_dims(flt: CaseFilter) -> tuple[DimensionCategory
             continue
         label = _MECHANISM_LABELS.get(key, key.replace("_", " "))
         baseline_cell = _tool_cell_from_share_row(
-            baseline_df.row(0, named=True), label="All tools (workshop-wide)"
+            baseline_df.row(0, named=True), label="All tools under current filters"
         )
         by_tool = {
             row["group_id"]: _tool_cell_from_share_row(row)
@@ -552,22 +551,23 @@ def _trend_cells(flt: CaseFilter) -> tuple[ToolCell | None, ToolCell | None]:
     regardless of the page's active basis toggle (D-13: trend compares annual averages by
     definition). Returns `(None, None)` when fewer than 2*N years are available in the current
     filter's domain."""
+    window_years = load_thresholds().trend_window_years
     years = available_years()
-    if len(years) < 2 * _TREND_WINDOW_YEARS:
+    if len(years) < 2 * window_years:
         return None, None
     latest = years[-1]
-    recent_start = latest - _TREND_WINDOW_YEARS + 1
+    recent_start = latest - window_years + 1
     prior_end = recent_start - 1
-    prior_start = prior_end - _TREND_WINDOW_YEARS + 1
+    prior_start = prior_end - window_years + 1
     if prior_start < years[0]:
         return None, None
     recent_flt = replace(flt, years=(recent_start, latest))
     prior_flt = replace(flt, years=(prior_start, prior_end))
     recent_cell = _cell_from_estimate_record(
-        cached_estimate_total(recent_flt), "annual_average", "all", "Workshop-wide"
+        cached_estimate_total(recent_flt), "annual_average", "all", "Under current filters"
     )
     prior_cell = _cell_from_estimate_record(
-        cached_estimate_total(prior_flt), "annual_average", "all", "Workshop-wide"
+        cached_estimate_total(prior_flt), "annual_average", "all", "Under current filters"
     )
     return recent_cell, prior_cell
 
@@ -579,9 +579,16 @@ def insight_frames(flt: CaseFilter, basis: str) -> InsightFrames:
     `st.cache_data`-wrapped queries keyed on the frozen `CaseFilter` + `basis`). `disproportionate`
     covers diagnosis/body-region/primary-mechanism (per D-13, INS-01, closing 03-VERIFICATION gap
     1): diagnosis/body-region dims come first (unchanged), mechanism dims are appended after."""
+    tool_estimates = cached_estimate_by(flt, "tool")
     tool_burden = {
         row["group_id"]: _tool_cell_from_estimate_row(row, basis)
-        for row in cached_estimate_by(flt, "tool").iter_rows(named=True)
+        for row in tool_estimates.iter_rows(named=True)
+    }
+    # A display toggle must not change the population defining the peer mean. Resolve peers
+    # consistently against annual-average stability, and use those same annual values in text.
+    peer_tool_burden = {
+        row["group_id"]: _tool_cell_from_estimate_row(row, "annual_average")
+        for row in tool_estimates.iter_rows(named=True)
     }
     total_burden = _cell_from_estimate_record(cached_estimate_total(flt), basis, "all", "All tools")
     severity_dims, disproportionate_dims = _severity_and_disproportionate_dims(flt)
@@ -597,7 +604,8 @@ def insight_frames(flt: CaseFilter, basis: str) -> InsightFrames:
         burden_outcomes=burden_dims,
         trend_recent=trend_recent,
         trend_prior=trend_prior,
-        trend_scope_label="Workshop-wide",
+        trend_scope_label="Under the current filters,",
+        peer_tool_burden=peer_tool_burden,
     )
 
 
@@ -1268,7 +1276,7 @@ _COMPARISON_MECHANISM_IDS: tuple[str, ...] = (
     "maintenance_setup",
 )
 _MISSING_COMPARISON_BASELINE = ToolCell(
-    tool_id="all", label="All tools (workshop-wide)", value=None, raw_n=0, stable=False
+    tool_id="all", label="All tools under current filters", value=None, raw_n=0, stable=False
 )
 
 
@@ -1486,7 +1494,7 @@ def body_map_frame(flt: CaseFilter, basis: str, measure: str) -> dict[str, Regio
     - "escalated": `dispositions` restricted to `dim_disposition.escalated_care` codes.
     Every region is ALSO decorated with the D-04 tooltip fields (share_display from
     `region_share_frame(flt)`, top_diagnosis/top_mechanism from `region_top_categories(flt,
-    basis)`) regardless of which measure drives the fill -- "—" when a field has no stable value.
+    basis)`) regardless of which measure drives the fill. Unavailable fields read "Not reportable".
     """
     if measure == "estimated":
         eff_flt = flt
@@ -1520,20 +1528,22 @@ def body_map_frame(flt: CaseFilter, basis: str, measure: str) -> dict[str, Regio
         top_diag, top_mech = top_categories.get(region_id, (None, None))
         share_row = share_by_region.get(region_id)
         share_display = (
-            stability_badge.resolve_share(share_row).display_value if share_row is not None else "—"
+            stability_badge.resolve_share(share_row).display_value
+            if share_row is not None
+            else "Not reportable"
         )
         measure_row = by_measure.get(region_id)
         if measure_row is None:
             values[region_id] = RegionValue(
                 label=row["label"],
                 value=None,
-                display_value="—",
+                display_value="Not reportable",
                 state=stability_badge.STATE_SUPPRESSED,
                 raw_n=0,
                 share_display=share_display,
                 share_label=None if flt.tools else "Share of all workshop injuries",
-                top_diagnosis=top_diag or "—",
-                top_mechanism=top_mech or "—",
+                top_diagnosis=top_diag or "Not available",
+                top_mechanism=top_mech or "Not available",
             )
             continue
         resolved = (
@@ -1549,8 +1559,8 @@ def body_map_frame(flt: CaseFilter, basis: str, measure: str) -> dict[str, Regio
             raw_n=resolved.raw_n,
             share_display=share_display,
             share_label=None if flt.tools else "Share of all workshop injuries",
-            top_diagnosis=top_diag or "—",
-            top_mechanism=top_mech or "—",
+            top_diagnosis=top_diag or "Not available",
+            top_mechanism=top_mech or "Not available",
         )
     return values
 
@@ -2199,7 +2209,7 @@ def power_state_frame(flt: CaseFilter, basis: str) -> pl.DataFrame:
                     "group_id": key,
                     "label": label,
                     "value": None,
-                    "display_value": "—",
+                    "display_value": "Not reportable",
                     "raw_n": 0,
                     "state": stability_badge.STATE_SUPPRESSED,
                 }
@@ -2224,7 +2234,7 @@ def power_state_frame(flt: CaseFilter, basis: str) -> pl.DataFrame:
 #
 # NEISS is an annual, lagged surveillance release: there is no "vs last month", and a single-year
 # change is noise at this sample size. The only comparison this app makes on a KPI is the data's
-# LATEST 5-YEAR WINDOW vs the PRECEDING 5-YEAR WINDOW, and `gated_delta` refuses to emit one
+# LATEST CONFIGURED WINDOW vs the PRECEDING EQUAL WINDOW, and `gated_delta` refuses to emit one
 # unless both windows clear the stability floor AND their 95% confidence intervals do not overlap
 # -- the same rule `wii.analytics.insights._trend_candidates` applies under
 # `trend_require_nonoverlapping_ci`, read from the same `insights.yaml` via `load_thresholds()`
@@ -2232,10 +2242,9 @@ def power_state_frame(flt: CaseFilter, basis: str) -> pl.DataFrame:
 # the existing cached query helpers; nothing here sums a weight.
 # ---------------------------------------------------------------------------
 
-# 3, not 5, and matched to `insights.trend_window_years` for the same reason that gate exists:
-# only 2019+ is comparable (see comparison_windows), and 2019-2025 cannot hold two 5-year
-# windows. Five would silently disable every delta on the page.
-_KPI_DELTA_WINDOW_YEARS = 3
+# The insight and KPI windows share one configuration source. Keeping the name preserves the
+# comparison-window API used by page tests and records the chosen span in one place.
+_KPI_DELTA_WINDOW_YEARS = load_thresholds().trend_window_years
 
 # The trend/effect-size floors (`trend_pct_min`, `share_ratio_min`, `share_pp_min`) are
 # deliberately NOT applied here. Those are editorial "is this worth a written sentence" gates for
@@ -2351,7 +2360,7 @@ def _burden_window_cell(flt: CaseFilter, years: tuple[int, int]) -> ToolCell | N
     record = cached_estimate_total(replace(flt, years=years))
     if record is None:
         return None
-    return _cell_from_estimate_record(record, "annual_average", "all", "Workshop-wide")
+    return _cell_from_estimate_record(record, "annual_average", "all", "Under current filters")
 
 
 def _share_window_cell(flt: CaseFilter, years: tuple[int, int], metric_id: str) -> ToolCell:

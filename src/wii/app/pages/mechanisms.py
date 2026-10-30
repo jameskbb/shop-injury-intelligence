@@ -459,14 +459,14 @@ def render() -> None:
     st.caption(NOT_RECORDED_CAPTION)
     # A line that prints a bare dash tells a reader nothing; it is shown only when there is a
     # volume to disclose.
-    if inp.excluded_display and inp.excluded_display != "—":
+    if inp.excluded_display and inp.excluded_display != "Not reportable":
         st.caption(EXCLUDED_VOLUME_TEMPLATE.format(volume=inp.excluded_display))
 
     _render_mechanism_matrix(flt, basis)
 
     st.header("Mechanism trend")
     years = available_years()
-    latest = years[-1] if years else "—"
+    latest = years[-1] if years else "Not available"
     st.caption(trend.MECHANISM_TREND_PRE2019_NOTE.format(latest=latest))
     trend_df, gate_result = mechanism_trend_frame(flt)
     if gate_result.show_chart:

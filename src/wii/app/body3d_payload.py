@@ -152,7 +152,7 @@ def _missing_region(label: str) -> RegionValue:
     return RegionValue(
         label=label,
         value=None,
-        display_value="—",
+        display_value="Not reportable",
         state=stability_badge.STATE_SUPPRESSED,
         raw_n=0,
     )

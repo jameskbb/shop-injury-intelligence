@@ -57,7 +57,7 @@ PAGE_SPECS: tuple[PageSpec, ...] = (
         "case-explorer",
         hide_global_tool_filter=True,
     ),
-    # PAGE-09 Signals: the cross-cutting ranked feed over the SAME INS-01 engine the other pages
+    # PAGE-09 Signals: the grouped feed over the SAME INS-01 engine the other pages
     # use. It carries no tool selector of its own -- the feed is deliberately workshop-wide, and
     # the global sidebar tool filter is the only thing that narrows it -- so
     # hide_global_tool_filter stays False. It sits with the analytical pages rather than after

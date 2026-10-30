@@ -281,7 +281,7 @@ def outcome_table_html(columns: list[tuple[str, RankedShares]], tool_labels: lis
     for label in tool_labels:
         cells: list[str] = []
         for name, _ranked in columns:
-            value, state = by_tool.get(label, {}).get(name, ("—", "suppressed"))
+            value, state = by_tool.get(label, {}).get(name, ("Not reportable", "suppressed"))
             css = "wii-limited" if state == "limited" else ""
             css = "wii-comparison-suppressed" if state == "suppressed" else css
             span = f'<span class="{css}">{html.escape(value)}</span>' if css else html.escape(value)

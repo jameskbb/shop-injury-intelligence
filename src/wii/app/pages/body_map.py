@@ -128,7 +128,7 @@ BODY3D_LEGEND_HTML = (
     '<span class="wii-body-key-label">Limited sample</span></span>'
     '<span class="wii-body-key-item">'
     f'<span class="wii-body-key-line" style="border-top:1px dashed {theme.CONSTRUCTION}"></span>'
-    '<span class="wii-body-key-label">Suppressed &mdash; unfilled</span></span>'
+    '<span class="wii-body-key-label">Suppressed: unfilled</span></span>'
     '<span class="wii-body-key-item">'
     f'<span class="wii-body-key-line" style="border-top:1px solid {theme.RULE}"></span>'
     '<span class="wii-body-key-label">No recorded cases</span></span>'

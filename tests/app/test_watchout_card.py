@@ -81,7 +81,7 @@ def test_watchout_card_nothing_clears_shows_fallback_and_hides_two_labels():
     assert FIELD_LABELS[2] in out  # "Common mechanism"
 
 
-def test_watchout_card_suppressed_region_shows_dash_and_label_other_fields_still_render():
+def test_watchout_card_suppressed_region_shows_not_reportable_and_label_other_fields_still_render():
     w = Watchout(
         tool_id="table_saw",
         tool_label="Table Saw",
@@ -94,7 +94,7 @@ def test_watchout_card_suppressed_region_shows_dash_and_label_other_fields_still
         stands_out=_STANDS_OUT_INSIGHT,
     )
     out = watchout_card_html(w)
-    assert "—" in out
+    assert "Not reportable" in out
     assert SUPPRESSED_LABEL in out
     assert "Amputation" in out
     assert "Kickback Ejection" in out

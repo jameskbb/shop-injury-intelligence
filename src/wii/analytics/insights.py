@@ -11,21 +11,21 @@ the banned vocabulary).
 
 Five INS-01 kinds:
 - severity: a tool's share of a disposition-based outcome (escalated care, admitted, ...) vs the
-  workshop-wide baseline share of that same outcome.
+  current-filter baseline share of that same outcome.
 - disproportionate: a tool's within-tool share of a diagnosis/body-region/primary-mechanism
-  (narrative-derived) category vs the workshop-wide baseline share of that category.
+  (narrative-derived) category vs the current-filter baseline share of that category.
 - burden_vs_share: a tool's share of total estimated burden vs its share of a specific severe
-  outcome's workshop-wide total ("X% of burden but Y% of amputations").
+  outcome's current-filter total ("X% of burden but Y% of amputations").
 - trend: latest-N-year vs prior-N-year annual average burden, gated on non-overlapping CIs.
-- baseline_comparison: a tool's estimated burden vs the mean per-tool burden across all stable
+- baseline_comparison: a tool's annual-average burden vs the mean across qualifying stable
   tools (a magnitude comparison, not a share).
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterable
-from dataclasses import dataclass
-from itertools import combinations
+from dataclasses import dataclass, field
+from itertools import combinations, zip_longest
 from pathlib import Path
 from statistics import mean
 
@@ -40,7 +40,7 @@ GUARDRAIL_TERMS: tuple[str, ...] = ("risk", "danger", "dangerous", "safer", "cau
 class Insight:
     """One rendered insight statement. `numbers` is an ordered tuple of (label, value) pairs the
     template text is built from (insight_card.py renders these in IBM Plex Mono); `tool_id` is
-    `None` for workshop-wide (non-tool-scoped) insights such as `trend`."""
+    `None` for non-tool-scoped insights such as `trend`."""
 
     kind: str
     text: str
@@ -98,7 +98,7 @@ class ToolCell:
 @dataclass(frozen=True)
 class DimensionCategory:
     """One comparison dimension for the `severity`/`disproportionate` kinds: a named category
-    (e.g. metric_id "amputation") with a workshop-wide baseline cell and a per-tool cell dict.
+    (e.g. metric_id "amputation") with a current-filter baseline cell and a per-tool cell dict.
     `category_id` may carry a "mechanism:" prefix (e.g. "mechanism:flying_debris_fb") for the
     narrative-derived primary-mechanism disproportionate dimension -- the engine treats it like
     any other category_id, with no dimension-specific behavior."""
@@ -123,7 +123,9 @@ class InsightFrames:
     burden_outcomes: tuple[DimensionCategory, ...] = ()
     trend_recent: ToolCell | None = None
     trend_prior: ToolCell | None = None
-    trend_scope_label: str = "Workshop-wide"
+    trend_scope_label: str = "Under the current filters,"
+    # Peer membership always uses annual-average reportability, independent of display basis.
+    peer_tool_burden: dict[str, ToolCell] = field(default_factory=dict)
 
 
 def _raw_n_text(n: int) -> str:
@@ -158,7 +160,7 @@ def _share_vs_baseline(
     dimension: DimensionCategory, thresholds: Thresholds, kind: str
 ) -> list[Insight]:
     """Shared comparator for the `severity` and `disproportionate` kinds: a tool's share of
-    `dimension` vs the workshop-wide baseline share, gated on ratio >= share_ratio_min AND
+    `dimension` vs the current-filter baseline share, gated on ratio >= share_ratio_min AND
     pp difference >= share_pp_min (both inclusive >=, evaluated on unrounded values). Only the
     "higher than baseline" direction is reported -- this engine never emits a "lower"/"safer"
     framing (guardrail)."""
@@ -175,7 +177,7 @@ def _share_vs_baseline(
         pp = (cell.value - baseline.value) * 100
         if _ge(ratio, thresholds.share_ratio_min) and _ge(pp, thresholds.share_pp_min):
             text = (
-                f"{cell.label} shows a higher {dimension.category_label} than the workshop "
+                f"{cell.label} shows a higher {dimension.category_label} than the current-filter "
                 f"baseline: {_fmt_share(cell.value)} vs {_fmt_share(baseline.value)} among ER "
                 f"cases, based on {_raw_n_text(cell.raw_n)}."
             )
@@ -186,7 +188,7 @@ def _share_vs_baseline(
                     tool_id=cell.tool_id,
                     numbers=(
                         (dimension.category_label, cell.value),
-                        ("workshop baseline", baseline.value),
+                        ("current-filter baseline", baseline.value),
                     ),
                     raw_n=cell.raw_n,
                     effect_size=ratio,
@@ -201,7 +203,7 @@ def _burden_vs_share_candidates(
     outcome: DimensionCategory,
     thresholds: Thresholds,
 ) -> list[Insight]:
-    """`outcome.by_tool` here holds each tool's SHARE OF THE WORKSHOP-WIDE OUTCOME TOTAL (not a
+    """`outcome.by_tool` here holds each tool's SHARE OF THE CURRENT-FILTER OUTCOME TOTAL (not a
     within-tool share) -- i.e. of all amputation cases, what fraction involve this tool -- built
     by the caller the same way as `outcome.baseline` (which is unused for this kind)."""
     if not total_burden or not _cells_qualify(total_burden, min_raw_n=thresholds.min_raw_n):
@@ -281,8 +283,10 @@ def _trend_candidates(frames: InsightFrames, thresholds: Thresholds) -> list[Ins
 def _baseline_comparison_candidates(
     tool_burden: dict[str, ToolCell], thresholds: Thresholds
 ) -> list[Insight]:
-    """A tool's estimated burden vs the mean per-tool burden across all stable, min-N-qualified
-    tools -- a magnitude comparison (not a share), reusing `share_ratio_min` as the ratio gate."""
+    """A tool's annual-average burden vs the mean across annual-stable, min-N-qualified tools.
+    This magnitude comparison reuses `share_ratio_min` as the ratio gate. Callers must supply
+    annual-average cells, independent of the active display basis.
+    """
     qualified = [
         c for c in tool_burden.values() if _cells_qualify(c, min_raw_n=thresholds.min_raw_n)
     ]
@@ -296,8 +300,9 @@ def _baseline_comparison_candidates(
         ratio = cell.value / avg_burden
         if _ge(ratio, thresholds.share_ratio_min):
             text = (
-                f"{cell.label} has an estimated {_fmt_estimate(cell.value)} injuries, "
-                f"{ratio:.1f}x the average tool's estimated burden, based on "
+                f"{cell.label} has an estimated annual average of {_fmt_estimate(cell.value)} "
+                f"injuries, {ratio:.1f}x the mean among qualifying tools under the current "
+                "filters, based on "
                 f"{_raw_n_text(cell.raw_n)}."
             )
             out.append(
@@ -305,7 +310,10 @@ def _baseline_comparison_candidates(
                     kind="baseline_comparison",
                     text=text,
                     tool_id=cell.tool_id,
-                    numbers=(("estimate", cell.value), ("average tool estimate", avg_burden)),
+                    numbers=(
+                        ("annual average", cell.value),
+                        ("qualifying-tool annual average", avg_burden),
+                    ),
                     raw_n=cell.raw_n,
                     effect_size=ratio,
                 )
@@ -313,21 +321,46 @@ def _baseline_comparison_candidates(
     return out
 
 
+# Fixed presentation order, not a ranking of evidence or consequences across kinds.
+INSIGHT_KIND_ORDER = (
+    "severity",
+    "disproportionate",
+    "burden_vs_share",
+    "trend",
+    "baseline_comparison",
+    "pairwise_comparison",
+)
+
+
+def rank_insights(candidates: list[Insight], max_cards: int) -> list[Insight]:
+    """Rank only within each kind, then take turns across kinds to fill a bounded selection.
+
+    Ratios and percent changes have different units and attainable ranges. Neither is a
+    statistical significance score. Fixed kind order carries no strength interpretation.
+    Text breaks ties between dimensions for the same tool, independent of input ordering.
+    """
+    kinds = [kind for kind in INSIGHT_KIND_ORDER if any(c.kind == kind for c in candidates)]
+    kinds.extend(sorted({c.kind for c in candidates} - set(kinds)))
+    groups = [
+        sorted(
+            (c for c in candidates if c.kind == kind),
+            key=lambda ins: (-ins.effect_size, ins.tool_id or "", ins.text),
+        )
+        for kind in kinds
+    ]
+    return [c for row in zip_longest(*groups) for c in row if c is not None][:max_cards]
+
+
 def _rank_and_cap(candidates: list[Insight], thresholds: Thresholds) -> list[Insight]:
-    """Deterministic tie-break by tool label (falling back to tool_id, then "" for workshop-wide
-    insights) then kind, so equal effect sizes always produce the same ordering."""
-    ranked = sorted(
-        candidates,
-        key=lambda ins: (-ins.effect_size, ins.tool_id or "", ins.kind),
-    )
-    return ranked[: thresholds.max_cards]
+    return rank_insights(candidates, thresholds.max_cards)
 
 
 def generate_insights(
     frames: InsightFrames, thresholds: Thresholds, basis: str, scope_tool: str | None = None
 ) -> list[Insight]:
     """Generates every INS-01 candidate statement from `frames`, keeps only those passing
-    `thresholds`, and returns at most `thresholds.max_cards`, ranked by effect size descending.
+    `thresholds`, and returns at most `thresholds.max_cards`, ranked within each kind and
+    selected in turns across kinds.
     `basis` is accepted for API symmetry with the metric layer (which basis-resolves `frames`)
     but this module makes no basis decisions itself -- `frames` already carries basis-resolved
     values. `scope_tool`, when given, restricts share/disproportionate/burden candidates to that
@@ -345,7 +378,7 @@ def generate_insights(
             )
         )
     candidates.extend(_trend_candidates(frames, thresholds))
-    candidates.extend(_baseline_comparison_candidates(frames.tool_burden, thresholds))
+    candidates.extend(_baseline_comparison_candidates(frames.peer_tool_burden, thresholds))
 
     if scope_tool is not None:
         candidates = [c for c in candidates if c.tool_id in (scope_tool, None)]
@@ -358,7 +391,7 @@ def compare_tools(
 ) -> list[Insight]:
     """Pairwise "how they differ" statements for exactly `tool_ids` (2-6, Comparison page 03-04):
     the same share-vs-share gates as `_share_vs_baseline`, but comparing two tools directly
-    instead of a tool against the workshop baseline."""
+    instead of a tool against the current-filter baseline."""
     del basis
     candidates: list[Insight] = []
     dimensions = (*frames.severity, *frames.disproportionate)
@@ -514,7 +547,7 @@ def build_watchout(
     `pick_top_stable` (mechanism excludes `WATCHOUT_EXCLUDED_MECHANISMS`); `distinctive` via
     `_distinctive_candidate_for_tool` restricted to `diagnosis_labels`' keys (`diagnosis_any`
     dimensions only); `stands_out` is the first `generate_insights(frames, thresholds, basis,
-    scope_tool=tool_id)` candidate whose own `tool_id` equals this tool (never a workshop-wide
+    scope_tool=tool_id)` candidate whose own `tool_id` equals this tool (never a non-tool-scoped
     `tool_id=None` candidate such as `trend`, which `generate_insights(scope_tool=...)` still lets
     through unfiltered)."""
     primary_region = pick_top_stable(regions)

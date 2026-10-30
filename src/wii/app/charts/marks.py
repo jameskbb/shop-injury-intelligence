@@ -28,28 +28,30 @@ from wii.app.components.stability_badge import (
 # Numbers. ONE formatting layer for every chart, delegating to the same
 # `stability_badge` formatters the KPI cards and tables use -- so 78.4% is written the same way on
 # a bar label, in a heatmap cell, in a tooltip and on a card, and no builder grows its own
-# f-string. `EM_DASH` is the single "there is no number here" mark.
+# f-string. `NOT_REPORTABLE` is the single "there is no number here" mark.
 # ---------------------------------------------------------------------------
 
-EM_DASH = "—"
+NOT_REPORTABLE = "Not reportable"
+#: Compact cell text; tooltips always expand this to NOT_REPORTABLE.
+NOT_REPORTABLE_SHORT = "N/R"
 
 
 def fmt_share(value: float | None) -> str:
-    """A share as a 1-decimal percentage ("78.4%"), or the em dash when there is none."""
-    return format_share(value) if value is not None else EM_DASH
+    """A share as a 1-decimal percentage ("78.4%"), or "Not reportable" when there is none."""
+    return format_share(value) if value is not None else NOT_REPORTABLE
 
 
 def fmt_estimate(value: float | None) -> str:
     """An estimated-injury count, rounded to the nearest 100 with thousands separators
-    ("2,418,400"), or the em dash when there is none."""
-    return format_estimate(value) if value is not None else EM_DASH
+    ("2,418,400"), or "Not reportable" when there is none."""
+    return format_estimate(value) if value is not None else NOT_REPORTABLE
 
 
 def fmt_points(delta: float | None) -> str:
     """A difference between two shares, in percentage POINTS and always signed ("+3.2 pts") --
     never a percentage, which is what a reader would otherwise take a share delta to be."""
     if delta is None:
-        return EM_DASH
+        return NOT_REPORTABLE
     return f"{delta * 100:+.1f} pts"
 
 

@@ -63,13 +63,13 @@ def test_resolve_basis_matched_independently():
     assert period.state == STATE_STABLE
 
 
-def test_resolve_suppressed_shows_dash_and_exact_label():
+def test_resolve_suppressed_shows_not_reportable_and_exact_label():
     """raw_n < 20 fails the hard floor regardless of a healthy value/cv."""
     row = _row(annual_average=5000.0, raw_n=10, cv=0.1)
     resolved = resolve(row, "annual_average")
     assert resolved.state == STATE_SUPPRESSED
     assert resolved.value is None
-    assert resolved.display_value == "—"
+    assert resolved.display_value == "Not reportable"
     assert resolved.label == SUPPRESSED_LABEL
 
 
@@ -80,7 +80,7 @@ def test_resolve_limited_shows_value_and_exact_label():
     resolved = resolve(row, "annual_average")
     assert resolved.state == STATE_LIMITED
     assert resolved.value == 1500.0
-    assert resolved.display_value != "—"
+    assert resolved.display_value != "Not reportable"
     assert resolved.label == LIMITED_SAMPLE_LABEL
 
 
@@ -173,8 +173,9 @@ def test_basis_caption_period_total():
 # mis-tiered as "limited" -- which shows a number -- instead of "suppressed", which does not.
 #
 # Observed on My Shop's first screen: "Share of workshop burden: 0.0% (Limited sample)" printed
-# beside an estimate the strip had already suppressed to "—". A visitor reads that as a bug in the
-# numbers, and the reader who trusts it reads a measured zero where there is no measurement at
+# beside an estimate the strip had already suppressed to "Not reportable". A visitor reads that as a
+# bug in the numbers, and the reader who trusts it reads a measured zero where there is no
+# measurement at
 # all. The metric layer was correct throughout; only this classification was wrong.
 
 
@@ -193,7 +194,7 @@ def test_share_with_a_hard_floor_failure_on_either_side_is_suppressed_not_limite
     for reason in ("num_est_lt_1200", "num_n_lt_20", "den_est_lt_1200", "den_n_lt_20"):
         resolved = resolve_share(_share_row(0.0000096, False, [reason, "num_cv_gt_0.33"]))
         assert resolved.state == STATE_SUPPRESSED, reason
-        assert resolved.display_value == "—"
+        assert resolved.display_value == "Not reportable"
         assert resolved.value is None
         assert resolved.label == SUPPRESSED_LABEL
 
@@ -205,13 +206,13 @@ def test_share_failing_only_the_cv_rule_is_still_limited_and_still_shows_its_num
     assert resolved.label == LIMITED_SAMPLE_LABEL
 
 
-def test_a_non_stable_share_rounding_to_zero_renders_a_dash_not_zero_point_zero():
+def test_a_non_stable_share_rounding_to_zero_renders_not_reportable_instead_of_zero():
     """The presentation guard behind the composite rule. "0.0% (Limited sample)" is a
     contradiction rather than a small number: the digits claim a measured zero that the label
-    withdraws in the same breath. The dash loses nothing -- the label and the raw-N line still
+    withdraws in the same breath. The label loses nothing -- the label and the raw-N line still
     say a value exists and is not reportable."""
     resolved = resolve_share(_share_row(0.00004, False, ["num_cv_gt_0.33"]))
-    assert resolved.display_value == "—"
+    assert resolved.display_value == "Not reportable"
     assert resolved.label == LIMITED_SAMPLE_LABEL  # quiet is not hidden
     assert resolved.state == STATE_LIMITED
 

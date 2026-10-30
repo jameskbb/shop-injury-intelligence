@@ -14,7 +14,7 @@ Two readability rules the review forced, both honesty-shaped rather than decorat
     split in one line -- two quantities per cell is fine, unlabelled two quantities is not.
   * Stability is LINE TREATMENT: a limited cell keeps its fill and its number under a dashed
     construction outline (`charts.marks`), instead of carrying a "(limited)" suffix in ~8px type
-    in most cells of the grid. A suppressed cell has NO fill and reads "—".
+    in most cells of the grid. A suppressed cell has NO fill and reads "N/R" (not reportable).
 
 `build_share_matrix` is the generic within-group share matrix behind the mechanism heatmap and the
 diagnosis signature. Pure figure-builders -- no Streamlit/`wii.metrics` calls happen here.
@@ -179,14 +179,14 @@ def _cell_number(value: float | None) -> str:
     whole number ("75%"), below it keeps the decimal that carries the meaning ("0.7%"). Hover and
     the table view always carry the unrounded share and its CI."""
     if value is None:
-        return marks.EM_DASH
+        return marks.NOT_REPORTABLE_SHORT
     return f"{value * 100:.0f}%" if value >= 0.1 else f"{value * 100:.1f}%"
 
 
 def _cell_text(state: str, display: str) -> str:
-    """The number, or "—" when there is no number. The old "(limited)" suffix is gone: the dashed
-    outline says it, in the channel reserved for saying it."""
-    return "—" if state == _STATE_SUPPRESSED else display
+    """The number, or "N/R" (not reportable) when there is no number. The old "(limited)"
+    suffix is gone: the dashed outline says it, in the channel reserved for saying it."""
+    return marks.NOT_REPORTABLE_SHORT if state == _STATE_SUPPRESSED else display
 
 
 def _state_label(state: str) -> str:
@@ -201,11 +201,11 @@ def _customdata_row(cell, baseline_value: float | None, state: str) -> list:
     """[value display, CI text, baseline display, raw N, stability label] -- one row per
     `_HOVERTEMPLATE`'s `%{customdata[i]}` reference: raw value, CI, the baseline it is compared
     against, raw N, stability."""
-    value_text = marks.fmt_share(cell.value) if cell is not None else "—"
+    value_text = marks.fmt_share(cell.value) if cell is not None else "Not reportable"
     if cell is not None and cell.ci_low is not None and cell.ci_high is not None:
         ci_text = f"{marks.fmt_share(cell.ci_low)}–{marks.fmt_share(cell.ci_high)}"
     else:
-        ci_text = "—"
+        ci_text = "Not reportable"
     baseline_text = marks.fmt_share(baseline_value)
     raw_n = cell.raw_n if cell is not None else 0
     return [value_text, ci_text, baseline_text, raw_n, _state_label(state)]
@@ -270,7 +270,7 @@ def build_fingerprint(
                 },
             },
             text=[
-                f" {_cell_number(v) if s != _STATE_SUPPRESSED else marks.EM_DASH}"
+                f" {_cell_number(v) if s != _STATE_SUPPRESSED else marks.NOT_REPORTABLE_SHORT}"
                 for v, s in zip(burden_values, burden_states, strict=True)
             ],
             textposition="outside",
@@ -307,7 +307,7 @@ def build_fingerprint(
             else:
                 z_row.append(log2_ratio_capped(cell.value, baseline_value))
                 state = "stable" if cell.stable else _STATE_LIMITED
-            # LIMITED only. A suppressed cell already reads "—" in its own cell; boxing every
+            # LIMITED only. A suppressed cell already reads "N/R" in its own cell; boxing every
             # one of them in dashes makes the sheet graph paper and re-creates, in a new ink,
             # exactly the "we don't trust this" dominance the amber hatch had.
             if state == _STATE_LIMITED:
@@ -463,10 +463,16 @@ def build_share_matrix(
             row = tool_rows.get(category)
             if row is None or row["state"] == _STATE_SUPPRESSED or row["value"] is None:
                 z_row.append(None)
-                text_row.append(marks.EM_DASH)
+                text_row.append(marks.NOT_REPORTABLE_SHORT)
                 raw_n = row["raw_n"] if row is not None else 0
                 cd_row.append(
-                    [marks.EM_DASH, marks.EM_DASH, raw_n, SUPPRESSED_LABEL, full_tool_label]
+                    [
+                        marks.NOT_REPORTABLE,
+                        marks.NOT_REPORTABLE,
+                        raw_n,
+                        SUPPRESSED_LABEL,
+                        full_tool_label,
+                    ]
                 )
                 suppressed_cells += 1
                 continue
@@ -488,7 +494,7 @@ def build_share_matrix(
             if row["ci_low"] is not None and row["ci_high"] is not None:
                 ci_text = f"{marks.fmt_share(row['ci_low'])}–{marks.fmt_share(row['ci_high'])}"
             else:
-                ci_text = "—"
+                ci_text = "Not reportable"
             cd_row.append([display, ci_text, row["raw_n"], state_label, full_tool_label])
         z.append(z_row)
         text.append(text_row)

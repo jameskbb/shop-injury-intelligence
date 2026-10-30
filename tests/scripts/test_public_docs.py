@@ -7,10 +7,8 @@ look like an artefact of its own process rather than a product. The same class o
 UI (three page captions shipped ending "(D-13)"); `tests/app/test_pages_smoke.py` guards the
 rendered strings, this guards the prose.
 
-Two internal documents were moved out of `docs/` entirely rather than reworded: a
-phase-completion report addressed to a reviewer, and a go-public checklist containing GSD
-commands. Both are stale as well as internal -- the report describes an 8-page app with an SVG
-body map -- so they were removed from the tree and are asserted absent here.
+An obsolete completion report stays outside the public docs. The publication runbook is now a
+reader-facing operational guide, covered by the same prose guards as every other document.
 """
 
 from __future__ import annotations
@@ -41,7 +39,7 @@ PORTFOLIO_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"\brecruiter\b", re.IGNORECASE),
 )
 
-MOVED_OUT_OF_DOCS = ("development-summary.md", "go-public-runbook.md")
+MOVED_OUT_OF_DOCS = ("development-summary.md",)
 
 
 def _public_docs() -> list:

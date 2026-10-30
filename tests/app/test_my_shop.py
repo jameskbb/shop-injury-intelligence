@@ -263,7 +263,7 @@ def test_protect_scale_defaults_to_0_1_when_all_suppressed():
 
     values = {
         "hand": RegionValue(
-            label="Hand", value=None, display_value="—", state="suppressed", raw_n=0
+            label="Hand", value=None, display_value="Not reportable", state="suppressed", raw_n=0
         ),
     }
     scale = my_shop_module._protect_scale(values, {"hand"})

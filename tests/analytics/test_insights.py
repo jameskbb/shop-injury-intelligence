@@ -231,6 +231,7 @@ def test_no_generated_text_contains_guardrail_vocabulary():
     frames = InsightFrames(
         tool_burden={"table_saw": _cell("table_saw", 100_000.0), "drill": _cell("drill", 5_000.0)},
         total_burden=_cell("all", 200_000.0, label="All tools"),
+        peer_tool_burden={"table_saw": _cell("table_saw", 100_000), "drill": _cell("drill", 5000)},
         severity=(
             DimensionCategory(
                 "escalated_care",
@@ -581,3 +582,44 @@ def test_compare_tools_mechanism_pairwise():
     assert len(out) == 1
     assert out[0].kind == "pairwise_comparison"
     assert "narrative-derived share of cases associated with" in out[0].text
+
+
+def test_selection_ranks_only_within_kind_and_keeps_other_kinds():
+    from dataclasses import replace
+
+    from wii.analytics.insights import Insight, rank_insights
+
+    severity = Insight("severity", "Outcome difference", "saw", (), 100, 2.0)
+    trend = Insight("trend", "Annual difference", None, (), 100, 95.0)
+    second = replace(severity, tool_id="router", effect_size=1.5)
+    assert rank_insights([trend, second, severity], 2) == [severity, trend]
+    assert rank_insights([trend, second, severity], 3) == [severity, trend, second]
+
+
+def test_share_baseline_wording_does_not_claim_workshop_scope():
+    frames = _dimension_frames("eye share", 0.10, 0.30)
+    insight = generate_insights(frames, THRESHOLDS, "annual_average")[0]
+    assert "current-filter baseline" in insight.text
+    assert "workshop" not in insight.text
+    assert insight.numbers[1][0] == "current-filter baseline"
+
+
+def test_explicit_peer_population_overrides_display_basis_cells():
+    from dataclasses import replace
+
+    peers = {"saw": _cell("saw", 9000), "router": _cell("router", 1500)}
+    frames = InsightFrames(tool_burden=peers, total_burden=None, peer_tool_burden=peers)
+    annual = generate_insights(frames, THRESHOLDS, "annual_average")
+    # A marginal tool becomes reportable for the period display. It must not join the peers.
+    period_cells = {
+        **{key: replace(cell, value=cell.value * 10) for key, cell in peers.items()},
+        "marginal": _cell("marginal", 5000),
+    }
+    period = generate_insights(
+        replace(frames, tool_burden=period_cells), THRESHOLDS, "period_total"
+    )
+    assert annual == period
+    assert annual and "annual average" in annual[0].text
+    assert (
+        generate_insights(replace(frames, peer_tool_burden={}), THRESHOLDS, "annual_average") == []
+    )

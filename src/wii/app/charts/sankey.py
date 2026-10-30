@@ -353,7 +353,7 @@ def _link_customdata(link: dict) -> list[str]:
     if link["ci_low"] is not None and link["ci_high"] is not None:
         ci_text = f"{link['ci_low']:,.0f}–{link['ci_high']:,.0f}"
     else:
-        ci_text = "—"
+        ci_text = "Not reportable"
     value_text = f"{link['value']:,.0f} estimated injuries"
     if link["state"] != STATE_STABLE:
         value_text = f"{value_text} ({_AGGREGATE_HOVER_LABEL})"

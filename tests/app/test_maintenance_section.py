@@ -67,7 +67,7 @@ def test_power_state_labels_exact():
     }
 
 
-def test_power_state_suppressed_rows_show_dash_and_raw_n(monkeypatch):
+def test_power_state_suppressed_rows_show_not_reportable_and_raw_n(monkeypatch):
     def fake_cached_estimate_by(flt, by):
         assert by == "power_state"
         return pl.DataFrame(
@@ -97,10 +97,10 @@ def test_power_state_suppressed_rows_show_dash_and_raw_n(monkeypatch):
     rows = {r["group_id"]: r for r in result.iter_rows(named=True)}
 
     assert rows["not_mentioned"]["state"] == "stable"
-    assert rows["mentioned_unplugged"]["display_value"] == "—"
+    assert rows["mentioned_unplugged"]["display_value"] == "Not reportable"
     assert rows["mentioned_unplugged"]["raw_n"] == 0
     assert rows["mentioned_unplugged"]["state"] == data_module.stability_badge.STATE_SUPPRESSED
-    assert rows["mentioned_plugged_in"]["display_value"] == "—"
+    assert rows["mentioned_plugged_in"]["display_value"] == "Not reportable"
     assert rows["mentioned_plugged_in"]["raw_n"] == 0
 
 

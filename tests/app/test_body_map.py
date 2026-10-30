@@ -129,10 +129,10 @@ def test_suppressed_region_is_dashed_and_unfilled_while_a_caseless_one_is_solid(
     only thing that separates them -- provisional geometry versus settled absence."""
     values = _full_values()
     values["wrist"] = RegionValue(
-        label="Wrist", value=None, display_value="—", state="suppressed", raw_n=12
+        label="Wrist", value=None, display_value="Not reportable", state="suppressed", raw_n=12
     )
     values["toe"] = RegionValue(
-        label="Toe", value=None, display_value="—", state="suppressed", raw_n=0
+        label="Toe", value=None, display_value="Not reportable", state="suppressed", raw_n=0
     )
     scale = BodyScale(vmin=0.0, vmax=1.0)
     root = ET.fromstring(build_body_svg(values, scale, "inst-a", "front"))
@@ -363,7 +363,7 @@ def test_callout_chip_labels_are_escaped():
 
 
 def _rv(label: str, value: float | None, state: str, raw_n: int = 200) -> RegionValue:
-    display = f"{value * 100:.1f}%" if value is not None else "—"
+    display = f"{value * 100:.1f}%" if value is not None else "Not reportable"
     return RegionValue(label=label, value=value, display_value=display, state=state, raw_n=raw_n)
 
 
@@ -695,7 +695,9 @@ def test_unstable_or_absent_regions_never_rise_toward_the_viewer():
     floor = body_map.DEPTH_FLOOR
     for rv in (
         RegionValue(label="r", value=100.0, display_value="", state="limited", raw_n=30),
-        RegionValue(label="r", value=None, display_value="—", state="suppressed", raw_n=12),
+        RegionValue(
+            label="r", value=None, display_value="Not reportable", state="suppressed", raw_n=12
+        ),
         RegionValue(label="r", value=0.0, display_value="0", state="stable", raw_n=0),
         None,
     ):
@@ -845,7 +847,7 @@ def test_a_small_multiple_drops_the_per_region_dashes_entirely():
         label="Wrist", value=0.3, display_value="30.0%", state="limited", raw_n=25
     )
     values["ankle"] = RegionValue(
-        label="Ankle", value=None, display_value="—", state="suppressed", raw_n=12
+        label="Ankle", value=None, display_value="Not reportable", state="suppressed", raw_n=12
     )
     scale = BodyScale(vmin=0.0, vmax=0.5)
     small = ET.fromstring(
@@ -862,7 +864,7 @@ def test_a_small_multiple_still_shows_which_regions_carry_a_value():
     reportable estimate is still the only thing filled."""
     values = _full_values(value_fn=lambda rid: 0.3 if rid == "hand" else 0.0)
     values["ankle"] = RegionValue(
-        label="Ankle", value=None, display_value="—", state="suppressed", raw_n=12
+        label="Ankle", value=None, display_value="Not reportable", state="suppressed", raw_n=12
     )
     scale = BodyScale(vmin=0.0, vmax=0.3)
     root = ET.fromstring(
@@ -879,7 +881,7 @@ def test_a_small_multiple_keeps_every_regions_stability_in_its_tooltip():
     the only place a careful reader can still recover each region's own state. It must survive."""
     values = _full_values()
     values["ankle"] = RegionValue(
-        label="Ankle", value=None, display_value="—", state="suppressed", raw_n=12
+        label="Ankle", value=None, display_value="Not reportable", state="suppressed", raw_n=12
     )
     root = ET.fromstring(
         build_body_svg(values, BodyScale(0.0, 1.0), "inst-a", "front", confidence_outlines=False)
@@ -908,8 +910,8 @@ def test_the_floor_note_states_the_count_without_naming_a_drawing_treatment():
     small multiple (no dashes at all), so naming the treatment would be false in one of them."""
     values = {
         "hand": RegionValue("Hand", 0.5, "50%", "stable", 80),
-        "ankle": RegionValue("Ankle", None, "—", "suppressed", 9),
-        "toe": RegionValue("Toe", None, "—", "suppressed", 4),
+        "ankle": RegionValue("Ankle", None, "Not reportable", "suppressed", 9),
+        "toe": RegionValue("Toe", None, "Not reportable", "suppressed", 4),
     }
     note = body_map.stability_floor_note(values, set(values))
     assert "2 of 3" in note and "carry no estimate" in note
@@ -922,7 +924,7 @@ def test_a_row_of_figures_collapses_four_identical_callout_lists_into_one_line()
     repeated ink than the figures carried. The categories are still named, and the reader is
     still told they are excluded; it is said once for the row instead of once per tool."""
     suppressed = {
-        callout_id: RegionValue(label, None, "—", "suppressed", 2)
+        callout_id: RegionValue(label, None, "Not reportable", "suppressed", 2)
         for callout_id, label in (
             ("internal", "Internal (use with aspiration and ingestion)"),
             ("burn_25_50", "25-50% of body"),
@@ -943,8 +945,8 @@ def test_the_row_note_defers_to_per_figure_chips_the_moment_one_carries_a_value(
     one has a reportable value the chips differ between figures and are worth their space, so the
     component says nothing and leaves the page to draw them."""
     suppressed = {
-        "internal": RegionValue("Internal", None, "—", "suppressed", 2),
-        "not_recorded": RegionValue("Not recorded", None, "—", "suppressed", 0),
+        "internal": RegionValue("Internal", None, "Not reportable", "suppressed", 2),
+        "not_recorded": RegionValue("Not recorded", None, "Not reportable", "suppressed", 0),
     }
     with_value = dict(suppressed)
     with_value["internal"] = RegionValue("Internal", 0.02, "2.0%", "stable", 40)

@@ -64,6 +64,10 @@ def _heatmap_trace(fig):
 
 
 def _overlay(fig, name):
+    name = {
+        SUPPRESSED_LABEL: temporal_heatmap.SUPPRESSED_LEGEND_LABEL,
+        LIMITED_SAMPLE_LABEL: temporal_heatmap.LIMITED_LEGEND_LABEL,
+    }.get(name, name)
     return next((t for t in fig.data if t.type == "scatter" and t.name == name), None)
 
 
@@ -120,7 +124,27 @@ def test_time_axis_is_numeric_years_not_categories():
     """A numeric x axis is what lets the 2019 boundary be drawn at a cell edge (x=2018.5)."""
     fig = build_temporal_heatmap(_matrix_df())
     assert all(isinstance(x, int) for x in _heatmap_trace(fig).x)
-    assert fig.layout.xaxis.dtick == 1
+    assert list(fig.layout.xaxis.tickvals) == [2017, 2019, 2020]
+
+
+def test_full_record_limits_year_labels_without_dropping_cells():
+    years = list(range(2006, 2026))
+    rows = [_cell("table_saw", "Table Saw", year, 20_000.0) for year in years]
+    fig = build_temporal_heatmap(pl.DataFrame(rows))
+    ticks = list(fig.layout.xaxis.tickvals)
+    assert len(ticks) <= 3
+    assert ticks[0] == years[0] and ticks[-1] == years[-1]
+    assert list(_heatmap_trace(fig).x) == years
+    assert fig.layout.xaxis.tickangle == 0
+
+
+def test_long_tool_names_keep_their_identity_and_full_hover_when_ticks_are_shortened():
+    label = "Portable Circular Power Saw"
+    rows = [_cell("circular_saw", label, 2025, 20_000.0)]
+    fig = build_temporal_heatmap(pl.DataFrame(rows))
+    assert list(_heatmap_trace(fig).y) == [label]
+    assert label in _heatmap_trace(fig).hovertext[0][0]
+    assert len(fig.layout.yaxis.ticktext[0]) <= 24
 
 
 # ---------------------------------------------------------------------------
@@ -165,7 +189,10 @@ def test_suppressed_and_limited_overlays_are_legended():
     fig = build_temporal_heatmap(_matrix_df())
     assert fig.layout.showlegend is True
     names = {t.name for t in fig.data if t.type == "scatter"}
-    assert names == {SUPPRESSED_LABEL, LIMITED_SAMPLE_LABEL}
+    assert names == {
+        temporal_heatmap.SUPPRESSED_LEGEND_LABEL,
+        temporal_heatmap.LIMITED_LEGEND_LABEL,
+    }
 
 
 def test_all_stable_matrix_renders_no_overlay_traces():
@@ -225,7 +252,7 @@ def test_hover_on_a_limited_cell_names_the_limited_sample_state():
 def test_hover_on_a_suppressed_cell_never_shows_a_number():
     trace = _heatmap_trace(build_temporal_heatmap(_matrix_df()))
     text = trace.hovertext[1][2]
-    assert "Estimated U.S. ER-treated injuries: —" in text
+    assert "Estimated U.S. ER-treated injuries: Not reportable" in text
     assert SUPPRESSED_LABEL in text
     assert "7 sample cases (not a national count)" in text
     assert "95% CI" not in text
@@ -258,9 +285,10 @@ def test_color_axis_starts_at_the_cpsc_reportability_floor():
 
 def test_colorbar_is_ticked_with_real_estimates_not_log_units():
     trace = _heatmap_trace(build_temporal_heatmap(_matrix_df()))
-    assert list(trace.colorbar.ticktext) == ["1,200", "2,000", "3,000", "5,000", "10,000", "20,000"]
+    assert trace.colorbar.orientation == "h"
+    assert list(trace.colorbar.ticktext) == ["1,200", "5,000", "20,000"]
     assert [round(v, 6) for v in trace.colorbar.tickvals] == [
-        round(math.log10(v), 6) for v in (1_200, 2_000, 3_000, 5_000, 10_000, 20_000)
+        round(math.log10(v), 6) for v in (1_200, 5_000, 20_000)
     ]
 
 
@@ -286,7 +314,9 @@ def test_2019_boundary_is_marked_on_the_cell_edge_when_the_span_crosses_it():
     vlines = [s for s in fig.layout.shapes if s.line.dash == "dot"]
     assert len(vlines) == 1
     assert vlines[0].x0 == SCHEMA_CHANGE_YEAR - 0.5
-    assert any("2019 coding change" in (a.text or "") for a in fig.layout.annotations)
+    assert vlines[0].name == "2019 coding change"
+    assert vlines[0].showlegend is True
+    assert not fig.layout.annotations
 
 
 def test_2019_boundary_is_absent_when_the_span_does_not_cross_it():

@@ -213,7 +213,7 @@ def render_kpi_strip(cards: list[KpiCard]) -> None:
     """Render `cards` as one deliberate grid: the column count comes from `strip_columns`, so the
     composition is balanced at desktop, 3-wide at tablet and 2-wide on phones (D-15). No KPI is
     ever silently dropped from the strip -- a suppressed estimate is still a card, just with value
-    "—" (D-07), so the strip's layout stays stable regardless of stability state.
+    "Not reportable" (D-07), so the strip's layout stays stable regardless of stability state.
     """
     desktop, tablet = strip_columns(len(cards))
     parts = [

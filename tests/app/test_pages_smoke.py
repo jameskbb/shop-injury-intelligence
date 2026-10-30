@@ -156,7 +156,8 @@ def test_tool_profiles_nondefault(app_test):
 
 
 def test_tool_profiles_unreportable_tool_states_the_reason(app_test):
-    """A tool whose own estimate is suppressed gets one explanation, not a dashboard of "—".
+    """A tool whose own estimate is suppressed gets one explanation, not a dashboard of "Not
+    reportable".
 
     Shaper (9 sample cases in 20 years) used to draw eight blank KPIs, four empty charts and a
     body plate captioned "22 of 22 body regions are below the reporting floor".
@@ -170,7 +171,7 @@ def test_tool_profiles_unreportable_tool_states_the_reason(app_test):
     subheaders = [s.value for s in at.subheader]
     assert any("No reportable estimate" in s for s in subheaders), subheaders
 
-    # None of the sections that would have been all-"—" are drawn.
+    # None of the sections that would have been all-"Not reportable" are drawn.
     headers = [h.value for h in at.header]
     for heading in ("Injury trend", "Anatomy snapshot", "Representative case patterns"):
         assert not any(heading in h for h in headers), f"unreportable page still drew {heading!r}"

@@ -111,7 +111,7 @@ def _ensure_default_selection(options: list[str]) -> None:
 
 def _cell_html(cell) -> str:
     if cell is None or cell.value is None:
-        return '<span class="wii-comparison-suppressed">—</span>'
+        return '<span class="wii-comparison-suppressed">Not reportable</span>'
     display = html.escape(format_share(cell.value))
     if not cell.stable:
         return f'<span>{display}</span><span class="wii-comparison-flag">Limited</span>'

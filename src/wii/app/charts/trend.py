@@ -147,7 +147,7 @@ def build_trend(df: pl.DataFrame, basis: str) -> go.Figure:
 
 
 def _fmt_pct(value: float | None) -> str:
-    return f"{value * 100:.1f}%" if value is not None else "—"
+    return f"{value * 100:.1f}%" if value is not None else "Not reportable"
 
 
 def _mechanism_hover_text(year: int, label: str, row: dict | None) -> str:
@@ -157,7 +157,7 @@ def _mechanism_hover_text(year: int, label: str, row: dict | None) -> str:
     ci_text = (
         f"{_fmt_pct(row['ci_low'])}–{_fmt_pct(row['ci_high'])}"
         if row["ci_low"] is not None and row["ci_high"] is not None
-        else "—"
+        else "Not reportable"
     )
     return (
         f"{year}<br>{label}: {_fmt_pct(row['value'])}{state_note}"

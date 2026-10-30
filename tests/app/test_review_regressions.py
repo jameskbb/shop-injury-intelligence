@@ -277,8 +277,8 @@ def test_numbers_format_the_same_way_everywhere():
     assert marks.fmt_estimate(2_418_391) == "2,418,400"
     assert marks.fmt_points(0.032) == "+3.2 pts"
     assert marks.fmt_points(-0.008) == "-0.8 pts"
-    assert marks.fmt_share(None) == marks.EM_DASH
-    assert marks.fmt_estimate(None) == marks.EM_DASH
+    assert marks.fmt_share(None) == marks.NOT_REPORTABLE
+    assert marks.fmt_estimate(None) == marks.NOT_REPORTABLE
 
 
 # ---------------------------------------------------------------------------

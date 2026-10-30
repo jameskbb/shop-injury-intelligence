@@ -33,14 +33,14 @@ def _row(
     }
 
 
-def test_matrix_suppressed_cell_dash_and_label():
+def test_matrix_suppressed_cell_not_reportable_and_label():
     df = pl.DataFrame([_row("table_saw", "finger", None, "suppressed", raw_n=5)])
     fig = region_tool_matrix.build_region_tool_matrix(
         df, ["finger"], {"finger": "Finger"}, ["table_saw"], {"table_saw": "Table Saw"}
     )
     heatmap = fig.data[0]
     assert heatmap.z[0][0] is None
-    assert heatmap.text[0][0] == "—"
+    assert heatmap.text[0][0] == "N/R"
     assert heatmap.customdata[0][0][5] == "Estimate suppressed – insufficient statistical stability"
 
 

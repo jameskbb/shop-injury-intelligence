@@ -1,26 +1,16 @@
-"""PAGE-09 Signals tests: the AppTest render paths (default filters, non-default filters, the
-two "nothing qualifies" paths) plus unit coverage of the page's own pure logic -- kind-normalized
-strength, tier assignment AT and one step below every configured threshold, and feed ordering.
-
-The tier cases are built from synthetic `Insight` objects and the REAL `load_thresholds()` /
-`load_signal_config()` values, so they assert the behaviour the shipped config produces rather
-than restating its numbers: an "at threshold" case is derived by multiplying the configured
-threshold multiple back up by the kind's own qualifying gate.
-"""
+"""Signals rendering and within-kind descriptive ranking regressions."""
 
 from __future__ import annotations
+
+import pytest
 
 import wii.app.pages.signals as signals_page
 from wii.analytics.insights import Insight, load_thresholds, scan_guardrail_vocabulary
 from wii.app.components.insight_card import EMPTY_STATE_COPY
 from wii.app.pages.signals import (
     SignalConfig,
-    TierRule,
-    assign_tier,
     load_signal_config,
-    qualifying_threshold,
     rank_signals,
-    signal_strength,
 )
 
 from .conftest import APP_TIMEOUT
@@ -29,7 +19,6 @@ _SIGNALS_PATH = "src/wii/app/pages/signals.py"
 
 THRESHOLDS = load_thresholds()
 CONFIG = load_signal_config()
-HIGH, NOTABLE = CONFIG.tiers[0], CONFIG.tiers[1]
 
 
 _CARD_MARKER = '<div class="wii-insight-card">'
@@ -59,18 +48,12 @@ def _insight(
     )
 
 
-def _effect_for_strength(strength: float, kind: str = "disproportionate") -> float:
-    """The `effect_size` a `kind` candidate needs to score exactly `strength` threshold
-    multiples, derived from the configured gate rather than hard-coded."""
-    return strength * qualifying_threshold(kind, THRESHOLDS)
-
-
 # ---------------------------------------------------------------------------
 # Render paths
 # ---------------------------------------------------------------------------
 
 
-def test_signals_default_renders_ranked_tiered_feed(app_test):
+def test_signals_default_renders_grouped_feed(app_test):
     at = app_test
     _switch_to_signals(at)
     at.run(timeout=APP_TIMEOUT)
@@ -85,14 +68,13 @@ def test_signals_default_renders_ranked_tiered_feed(app_test):
 
     feed_html = _feed_markdown(at)
     assert feed_html, "no signal feed rendered at default filters"
-    # A significance tier tag on every card, and more than one tier present -- the feed is a
-    # ranked cross-cutting set, not a single flat list.
     card_count = feed_html.count(_CARD_MARKER)
-    assert card_count == sum(
-        feed_html.count(f">{rule.name}</span>") for rule in CONFIG.tiers
-    ) + feed_html.count(f">{CONFIG.base_tier}</span>")
-    assert card_count <= CONFIG.max_cards
-    assert HIGH.name in feed_html
+    assert 0 < card_count <= CONFIG.max_cards
+    assert "High impact" not in feed_html
+    assert "qualifying threshold" not in feed_html
+    assert "wii-signal-strength" not in feed_html
+    assert "workshop baseline" not in feed_html
+    assert at.subheader
 
     # Requirement: each card carries its comparison baseline and its supporting raw N.
     assert "Compared with" in feed_html
@@ -110,11 +92,17 @@ def test_signals_nondefault_filter_renders(app_test):
     at.session_state["year_range"] = (2024, 2025)
     at.session_state["age_scope"] = "all"
     at.session_state["basis"] = "period_total"
+    at.session_state["f_families"] = ("saws",)
     at.run(timeout=APP_TIMEOUT)
     assert not at.exception
 
     headers = [h.value for h in at.header]
     assert any(signals_page.FEED_HEADER in h for h in headers)
+    feed = _feed_markdown(at)
+    assert feed
+    assert "workshop-wide" not in feed
+    assert "workshop baseline" not in feed
+    assert "current-filter baseline" in feed
 
 
 def test_signals_insufficient_signals_shows_plain_note_not_padding(app_test):
@@ -152,232 +140,124 @@ def test_signals_zero_case_filter_shows_empty_state(app_test):
     assert all(signals_page.FEED_HEADER not in h for h in headers)
 
 
-# ---------------------------------------------------------------------------
-# Honesty guardrails
-# ---------------------------------------------------------------------------
-
-
 def test_signals_copy_passes_guardrails():
-    """Every string this page can put on screen -- module constants plus the per-kind label and
-    baseline dictionaries -- is scanned for the INS-01 banned vocabulary, the same way
-    tests/app/test_body_map_page.py scans the Body Map's copy."""
     for name in dir(signals_page):
         if name.startswith("_"):
             continue
         value = getattr(signals_page, name)
         if isinstance(value, str):
-            assert scan_guardrail_vocabulary(value) == [], f"{name} failed guardrail scan"
+            assert scan_guardrail_vocabulary(value) == [], name
         elif isinstance(value, dict):
-            for key, item in value.items():
+            for item in value.values():
                 if isinstance(item, str):
-                    assert scan_guardrail_vocabulary(item) == [], (
-                        f"{name}[{key!r}] failed guardrail scan"
-                    )
+                    assert scan_guardrail_vocabulary(item) == []
 
 
-def test_signals_rendered_card_copy_passes_guardrails(app_test):
-    """The guardrail also has to hold for the ASSEMBLED card markup, which interpolates
-    engine-generated text and data-derived tool labels into this page's own wording."""
-    at = app_test
-    _switch_to_signals(at)
-    at.run(timeout=APP_TIMEOUT)
-    assert not at.exception
-
-    feed_html = _feed_markdown(at)
-    assert feed_html, "no signal feed rendered at default filters"
-    assert scan_guardrail_vocabulary(feed_html) == []
+def test_ranking_does_not_compare_different_units_or_assign_tiers():
+    share = _insight(kind="severity", effect_size=2, raw_n=100)
+    trend = _insight(kind="trend", effect_size=90, raw_n=500)
+    higher_share = _insight(kind="severity", effect_size=3, raw_n=100, tool_id="router")
+    ranked = rank_signals([share, trend, higher_share], CONFIG)
+    assert ranked == [higher_share, trend, share]
+    assert rank_signals(list(reversed([share, trend, higher_share])), CONFIG) == ranked
 
 
-def test_tier_names_are_not_hazard_language():
-    for rule in CONFIG.tiers:
-        assert scan_guardrail_vocabulary(rule.name) == []
-    assert scan_guardrail_vocabulary(CONFIG.base_tier) == []
-
-
-# ---------------------------------------------------------------------------
-# Kind-normalized strength
-# ---------------------------------------------------------------------------
-
-
-def test_qualifying_threshold_is_each_kinds_own_gate():
-    assert qualifying_threshold("trend", THRESHOLDS) == THRESHOLDS.trend_pct_min
-    assert (
-        qualifying_threshold("burden_vs_share", THRESHOLDS) == THRESHOLDS.burden_outcome_ratio_min
-    )
-    for kind in ("severity", "disproportionate", "baseline_comparison"):
-        assert qualifying_threshold(kind, THRESHOLDS) == THRESHOLDS.share_ratio_min
-
-
-def test_signal_strength_is_one_for_a_finding_exactly_at_its_gate():
-    for kind in ("severity", "disproportionate", "burden_vs_share", "trend"):
-        insight = _insight(kind=kind, effect_size=qualifying_threshold(kind, THRESHOLDS), raw_n=100)
-        assert signal_strength(insight, THRESHOLDS) == 1.0
-
-
-def test_signal_strength_makes_kinds_comparable():
-    """A percent-change trend and a ratio share that each cleared their own gate by the same
-    factor must score the same, even though their raw effect sizes differ by an order of
-    magnitude -- this is the whole reason the feed re-ranks rather than sorting on effect size."""
-    trend = _insight(kind="trend", effect_size=_effect_for_strength(2.0, "trend"), raw_n=500)
-    share = _insight(effect_size=_effect_for_strength(2.0), raw_n=500)
-    assert trend.effect_size != share.effect_size
-    assert signal_strength(trend, THRESHOLDS) == signal_strength(share, THRESHOLDS) == 2.0
-
-
-# ---------------------------------------------------------------------------
-# Tier assignment: at, and one step below, each configured threshold
-# ---------------------------------------------------------------------------
-
-
-def test_tier_at_high_impact_threshold():
-    assert assign_tier(HIGH.min_strength, HIGH.min_raw_n, CONFIG) == HIGH.name
-
-
-def test_tier_one_step_below_high_impact_strength_falls_to_notable():
-    assert assign_tier(HIGH.min_strength - 0.01, HIGH.min_raw_n, CONFIG) == NOTABLE.name
-
-
-def test_tier_one_step_below_high_impact_raw_n_falls_to_notable():
-    """Sample size is a hard gate, not a tiebreaker: a finding with a top-tier effect measured on
-    one case too few is demoted, never promoted on effect size alone."""
-    assert assign_tier(HIGH.min_strength, HIGH.min_raw_n - 1, CONFIG) == NOTABLE.name
-
-
-def test_tier_at_notable_threshold():
-    assert assign_tier(NOTABLE.min_strength, NOTABLE.min_raw_n, CONFIG) == NOTABLE.name
-
-
-def test_tier_one_step_below_notable_strength_falls_to_base_tier():
-    assert assign_tier(NOTABLE.min_strength - 0.01, NOTABLE.min_raw_n, CONFIG) == CONFIG.base_tier
-
-
-def test_tier_one_step_below_notable_raw_n_falls_to_base_tier():
-    assert assign_tier(NOTABLE.min_strength, NOTABLE.min_raw_n - 1, CONFIG) == CONFIG.base_tier
-
-
-def test_tier_at_the_engines_own_minimum_is_the_base_tier():
-    """A finding that only just cleared the engine's gates (strength 1.0 on the engine's minimum
-    sample count) is shown, but is never promoted into a named tier."""
-    assert assign_tier(1.0, THRESHOLDS.min_raw_n, CONFIG) == CONFIG.base_tier
-
-
-def test_tier_threshold_comparison_is_inclusive_under_float_error():
-    """0.30/0.20 is 1.4999999999999998 in IEEE-754, so an at-threshold multiple assembled from
-    ordinary decimals must still count as AT the threshold."""
-    strength = 0.3 / 0.2 * (NOTABLE.min_strength / 1.5)
-    assert assign_tier(strength, NOTABLE.min_raw_n, CONFIG) == NOTABLE.name
-
-
-def test_tier_thresholds_come_from_the_config_not_the_page_source():
-    source = (signals_page.__file__ or "").replace(".pyc", ".py")
-    text = open(source, encoding="utf-8").read()
-    for rule in CONFIG.tiers:
-        assert str(rule.min_strength) not in text, (
-            f"{rule.name} min_strength is a literal in signals.py; it belongs in insights.yaml"
-        )
-
-
-# ---------------------------------------------------------------------------
-# Feed ordering and cap
-# ---------------------------------------------------------------------------
-
-
-def test_rank_signals_orders_by_tier_then_strength_not_raw_effect_size():
-    weak_trend = _insight(
-        kind="trend",
-        effect_size=_effect_for_strength(1.2, "trend"),
-        raw_n=HIGH.min_raw_n,
-        tool_id=None,
-    )
-    strong_share = _insight(
-        effect_size=_effect_for_strength(3.0), raw_n=HIGH.min_raw_n, tool_id="table_saw"
-    )
-    assert weak_trend.effect_size > strong_share.effect_size
-
-    ranked = rank_signals([weak_trend, strong_share], THRESHOLDS, CONFIG)
-    assert [s.insight for s in ranked] == [strong_share, weak_trend]
-    assert ranked[0].tier == HIGH.name
-
-
-def test_rank_signals_puts_a_lower_tier_below_a_higher_one_even_at_a_higher_strength():
-    """A huge effect on a thin sample must not outrank a solidly-supported top-tier finding."""
-    thin_but_extreme = _insight(
-        effect_size=_effect_for_strength(9.0), raw_n=NOTABLE.min_raw_n, tool_id="router"
-    )
-    well_supported = _insight(
-        effect_size=_effect_for_strength(HIGH.min_strength), raw_n=HIGH.min_raw_n, tool_id="sander"
-    )
-    ranked = rank_signals([thin_but_extreme, well_supported], THRESHOLDS, CONFIG)
-    assert [s.tier for s in ranked] == [HIGH.name, NOTABLE.name]
-    assert ranked[0].insight is well_supported
-
-
-def test_rank_signals_caps_the_feed_and_never_pads_it():
-    many = [
-        _insight(effect_size=_effect_for_strength(3.0), raw_n=HIGH.min_raw_n, tool_id=f"tool_{i}")
-        for i in range(CONFIG.max_cards + 7)
-    ]
-    assert len(rank_signals(many, THRESHOLDS, CONFIG)) == CONFIG.max_cards
-    assert rank_signals([], THRESHOLDS, CONFIG) == []
-
-
-def test_rank_signals_is_deterministic_for_equal_scores():
-    a = _insight(effect_size=_effect_for_strength(2.0), raw_n=HIGH.min_raw_n, tool_id="b_tool")
-    b = _insight(effect_size=_effect_for_strength(2.0), raw_n=HIGH.min_raw_n, tool_id="a_tool")
-    assert [s.insight.tool_id for s in rank_signals([a, b], THRESHOLDS, CONFIG)] == [
-        "a_tool",
-        "b_tool",
-    ]
-    assert [s.insight.tool_id for s in rank_signals([b, a], THRESHOLDS, CONFIG)] == [
-        "a_tool",
-        "b_tool",
-    ]
-
-
-# ---------------------------------------------------------------------------
-# Config loading
-# ---------------------------------------------------------------------------
-
-
-def test_load_signal_config_reads_the_shipped_thresholds_file():
-    assert CONFIG.tiers, "no significance tiers configured"
-    assert CONFIG.base_tier
-    # Tiers are strongest-first, and every tier demands more than the engine's own minimum
-    # sample count -- otherwise a tier would mean nothing beyond "it qualified".
-    strengths = [rule.min_strength for rule in CONFIG.tiers]
-    assert strengths == sorted(strengths, reverse=True)
-    for rule in CONFIG.tiers:
-        assert rule.min_strength >= 1.0
-        assert rule.min_raw_n > THRESHOLDS.min_raw_n
-    # The feed must be able to show more than the engine's own per-section cap, or the page adds
-    # nothing over the Overview's insight section.
-    assert CONFIG.max_cards > THRESHOLDS.max_cards
-    assert CONFIG.candidate_pool >= CONFIG.max_cards
+def test_feed_cap_preserves_kind_representation():
+    shares = [_insight(effect_size=10 + i, raw_n=200, tool_id=f"tool_{i}") for i in range(20)]
+    trend = _insight(kind="trend", effect_size=20, raw_n=200)
+    config = SignalConfig(candidate_pool=100, max_cards=3)
+    ranked = rank_signals([*shares, trend], config)
+    assert len(ranked) == 3
+    assert trend in ranked
+    assert rank_signals([], config) == []
 
 
 def test_load_signal_config_rejects_a_truncated_block(tmp_path):
+    import pytest
+
     path = tmp_path / "insights.yaml"
     path.write_text("signals:\n  candidate_pool: 10\n", encoding="utf-8")
-    try:
+    with pytest.raises(ValueError, match="max_cards"):
         load_signal_config(path)
-    except ValueError as exc:
-        assert "max_cards" in str(exc)
-    else:  # pragma: no cover - the call above must raise
-        raise AssertionError("a signals block missing keys must raise")
 
 
-def test_assign_tier_falls_back_to_the_base_tier_with_no_rules():
-    empty = SignalConfig(candidate_pool=1, max_cards=1, tiers=(), base_tier="MODERATE")
-    assert assign_tier(99.0, 10_000, empty) == "MODERATE"
+def test_filtered_baseline_copy_names_current_filters():
+    for kind in ("severity", "disproportionate", "baseline_comparison"):
+        assert "current filters" in signals_page.KIND_BASELINES[kind]
+        assert "workshop-wide" not in signals_page.KIND_BASELINES[kind]
 
 
-def test_assign_tier_uses_the_first_satisfied_rule_in_configured_order():
-    config = SignalConfig(
-        candidate_pool=10,
-        max_cards=5,
-        tiers=(TierRule("TOP", 2.0, 100), TierRule("MIDDLE", 1.5, 50)),
-        base_tier="BASE",
+def test_peer_findings_invariant_under_display_basis():
+    from dataclasses import replace
+
+    from wii.analytics.insights import generate_insights
+    from wii.app.data import insight_frames
+    from wii.metrics import CaseFilter
+
+    frames = [insight_frames(CaseFilter(), basis) for basis in ("annual_average", "period_total")]
+    peers = [frame.peer_tool_burden for frame in frames]
+    assert peers[0]
+    assert peers[0].keys() == peers[1].keys()
+    # DuckDB's parallel weighted sums may differ at machine precision between queries.
+    # Membership, reportability, sample counts, and displayed findings must be unchanged.
+    for tool_id, annual in peers[0].items():
+        period = peers[1][tool_id]
+        assert (annual.label, annual.raw_n, annual.stable) == (
+            period.label,
+            period.raw_n,
+            period.stable,
+        )
+        for field in ("value", "ci_low", "ci_high"):
+            assert getattr(annual, field) == pytest.approx(getattr(period, field), rel=1e-12)
+    results = [
+        [
+            i
+            for i in generate_insights(
+                frame, replace(THRESHOLDS, max_cards=CONFIG.candidate_pool), basis
+            )
+            if i.kind == "baseline_comparison"
+        ]
+        for frame, basis in zip(frames, ("annual_average", "period_total"), strict=True)
+    ]
+    assert results[0], "fixture must produce a peer comparison"
+    assert len(results[0]) == len(results[1])
+    for annual, period in zip(*results, strict=True):
+        assert (annual.kind, annual.tool_id, annual.text, annual.raw_n) == (
+            period.kind,
+            period.tool_id,
+            period.text,
+            period.raw_n,
+        )
+        assert annual.effect_size == pytest.approx(period.effect_size, rel=1e-12)
+        assert [label for label, _ in annual.numbers] == [label for label, _ in period.numbers]
+        assert [value for _, value in annual.numbers] == pytest.approx(
+            [value for _, value in period.numbers], rel=1e-12
+        )
+
+
+def test_trend_adapter_uses_configured_window_length(monkeypatch):
+    from dataclasses import replace
+
+    import wii.app.data as data_module
+    from wii.metrics import CaseFilter
+
+    queries = []
+    monkeypatch.setattr(
+        data_module, "load_thresholds", lambda: replace(THRESHOLDS, trend_window_years=2)
     )
-    assert assign_tier(2.5, 100, config) == "TOP"
-    assert assign_tier(2.5, 99, config) == "MIDDLE"
-    assert assign_tier(2.5, 49, config) == "BASE"
+    monkeypatch.setattr(data_module, "available_years", lambda: list(range(2019, 2026)))
+    monkeypatch.setattr(data_module, "cached_estimate_total", lambda flt: queries.append(flt.years))
+    monkeypatch.setattr(data_module, "_cell_from_estimate_record", lambda *args: None)
+    data_module._trend_cells(CaseFilter())
+    assert queries == [(2024, 2025), (2022, 2023)]
+
+
+def test_unknown_finding_kind_is_rendered(monkeypatch):
+    headings = []
+    markup = []
+    monkeypatch.setattr(signals_page.st, "subheader", headings.append)
+    monkeypatch.setattr(signals_page.st, "markdown", lambda text, **kwargs: markup.append(text))
+    finding = _insight(kind="future_kind", effect_size=2, raw_n=100)
+    signals_page._render_feed([finding])
+    assert headings == ["Future kind"]
+    assert finding.text in markup[0]

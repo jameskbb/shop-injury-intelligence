@@ -96,8 +96,8 @@ def suppressed_footer_note(df: pl.DataFrame, basis: str) -> str | None:
 def all_suppressed_note(df: pl.DataFrame, basis: str, noun: str = "rows") -> str:
     """The single honest line a page prints INSTEAD of an all-suppressed chart (MECH-10). Plotly
     autoranges a zero-width axis when every bar is zero-length and `~s` then emits SI milli-units
-    ("−500m … 500m") beside a column of "—" rows; there is no version of that chart worth
-    drawing, so the builder returns `None` and the page prints this."""
+    ("−500m … 500m") beside a column of "Not reportable" rows; there is no version of that
+    chart worth drawing, so the builder returns `None` and the page prints this."""
     resolved = _resolved_rows(df, basis)
     labels = [row["display_label"] for row, _ in resolved]
     raw_n = sum(res.raw_n or 0 for _, res in resolved)
@@ -119,13 +119,13 @@ def build_ranked_bars(
 
     Returns `None` when NO row is drawable (every row suppressed, or an empty frame): an
     all-suppressed ranked chart has a zero-width value axis, so Plotly autoranges it to
-    [-1, 1] and the `~s` tick format prints milli-units beside a column of "—" rows. The page
-    prints `all_suppressed_note(df, basis)` instead (MECH-10).
+    [-1, 1] and the `~s` tick format prints milli-units beside a column of "Not reportable" rows.
+    The page prints `all_suppressed_note(df, basis)` instead (MECH-10).
 
     `suppressed_footer=True` omits suppressed rows from the axis entirely (OV-08: 14 blank ranks
     is half a chart of empty space); the page names them with `suppressed_footer_note(df, basis)`
     so nothing is silently dropped. The default keeps every suppressed row on the axis with a
-    "—" text label and a zero-length (hidden) bar.
+    "Not reportable" text label and a zero-length (hidden) bar.
     """
     resolved = _resolved_rows(df, basis)
     drawable = [
@@ -138,9 +138,12 @@ def build_ranked_bars(
 
     labels = [row["display_label"] for row, _ in resolved]
     values = [res.value if res.value is not None else 0.0 for _, res in resolved]
-    # A suppressed row reads "—" at the baseline (D-07), never a zero. Numeric values are printed
-    # by the separate label trace below, past the end of each CI whisker.
-    text = ["—" if res.state == stability_badge.STATE_SUPPRESSED else "" for _, res in resolved]
+    # A suppressed row reads "Not reportable" at the baseline (D-07), never a zero.
+    # Numeric values are printed by the separate label trace below, past the end of each CI whisker.
+    text = [
+        "Not reportable" if res.state == stability_badge.STATE_SUPPRESSED else ""
+        for _, res in resolved
+    ]
     # LINE TREATMENT = CONFIDENCE. A limited bar keeps its length (the estimate is still the
     # estimate) but is filled one step lighter and outlined with a dashed construction line drawn
     # by `marks.add_confidence_outlines` below. No hatch, no amber, no colour-coded stability --

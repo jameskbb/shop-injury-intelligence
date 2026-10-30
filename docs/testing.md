@@ -1,6 +1,6 @@
 # Test Traceability
 
-Every item in the brief's TESTING list maps to real, synthetic-fixture pytest node ids below.
+The core testing checklist maps to real, synthetic-fixture pytest node ids below.
 All tests use synthetic fixtures only; none download CPSC data during a normal run.
 `realdata`-marked tests read local `data/raw/` files and are excluded by default
 (`addopts = "-m 'not realdata'"` in `pyproject.toml`); they only run when raw annual files are
@@ -30,6 +30,9 @@ Run the `realdata` suite (requires local `data/raw/neiss{YEAR}.tsv` files; never
 ```bash
 uv run pytest -m realdata -q
 ```
+
+Before a deployment, also follow the [deployment smoke checklist](deployment.md#browser-smoke-checklist).
+HTTP health and automated tests do not verify the hosted browser session, proxy, or WebGL behavior.
 
 ## Traceability Table
 

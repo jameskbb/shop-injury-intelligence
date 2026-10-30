@@ -6,6 +6,8 @@ Workshop Injury Intelligence turns U.S. Consumer Product Safety Commission emerg
 data into an interactive view of how workshop tools are associated with injuries, where on the
 body those injuries occur, and what the underlying incident narratives reveal.
 
+**Live app:** [shop-injury-intelligence.streamlit.app](https://shop-injury-intelligence.streamlit.app/)
+
 ![Body Map: the interactive 3D body figure after picking Bench or Table Saw: the rest of the figure recedes and only the two hands carry ink, the areas where that tool's estimated ER-treated injuries concentrate](docs/screenshots/hero.png)
 
 ## What problem this solves
@@ -37,8 +39,8 @@ mined for tool subtype, mechanism, and activity when the official product code a
 - Narrative-derived injury mechanisms and a five-stage injury pathway ([Mechanisms](#screenshots)).
 - Side-by-side tool comparison and a personal "My Shop" profile scoped to the tools you own.
 - A searchable case explorer over individual, de-identified ER narratives.
-- A ranked Signals feed surfacing the strongest deterministic findings across every tool at
-  once, each tier-tagged and carrying its own comparison baseline and sample size.
+- A Signals feed grouping deterministic findings by kind under the current filters, with each
+  finding carrying its comparison baseline and sample size.
 - A Methodology & Data page documenting the full pipeline, validation, data-quality checks,
   and known limitations.
 
@@ -128,9 +130,14 @@ measure.
 ## Running locally
 
 ```bash
-uv sync
-uv run streamlit run app.py
+uv sync --locked --python 3.13
+uv run --locked streamlit run app.py
 ```
+
+The committed processed data are ready to serve: no raw downloads, database server, or API keys
+are needed. The [live app](https://shop-injury-intelligence.streamlit.app/) runs on Streamlit
+Community Cloud and redeploys on every push to `main`. See [deployment instructions](docs/deployment.md)
+for the hosted setup, a self-hosted start command, health check, and browser smoke checks.
 
 ## Refreshing data
 
@@ -199,7 +206,7 @@ uv run pytest -m realdata -q
 ```
 
 This requires `data/raw/neiss{YEAR}.tsv` files to already be present locally; it never downloads.
-Every item in the brief's testing list is traced to a real, resolvable test id in
+Core statistical, data, and classifier behaviors are traced to real, resolvable test ids in
 [`docs/testing.md`](docs/testing.md), which is itself checked by a test that fails if a cited test
 is renamed or removed.
 
@@ -213,7 +220,7 @@ is renamed or removed.
 | Storage | Parquet | Curated tables are 4.4 MB committed, so the app needs no data setup and no database service. |
 | Query layer | DuckDB 1.5 | Analytical SQL over the Parquet tables, including the survey-weighted variance pass, with no server to deploy. |
 | Statistics | `scipy` + hand-rolled Taylor linearization | Stratified ultimate-cluster variance from Stratum, PSU and Weight. A ~20-line closed-form formula the project can test directly, rather than a survey-stats dependency. |
-| Application | Streamlit 1.63 | `st.navigation` / `st.Page` routing, `st.cache_data` throughout, and a custom dark theme rather than framework defaults. |
+| Application | Streamlit 1.63 | `st.navigation` / `st.Page` routing, `st.cache_data` throughout, and a custom light drafting theme rather than framework defaults. |
 | Charts | Plotly 6 | Native Sankey, and selection events wired through Streamlit without a third-party event bridge. The body map is a Three.js 3D figure (an `st.components.v2` component) with a hand-authored SVG fallback, not a chart library. |
 | Quality | ruff 0.16, pytest 8 | Lint, format and the synthetic test suite all run on every push. |
 
@@ -342,15 +349,16 @@ every mechanism category is derived from.
 
 ### 8. Signals
 
-**What stands out across every tool?**
+**What stands out under the current filters?**
 
-One ranked cross-cutting feed of the findings that clear the stability and effect-size gates,
-tiered by strength. Every card carries what differs, its magnitude, the baseline it was compared
-against, and the sample size behind it.
+Findings that clear the stability and effect-size gates, grouped by kind under the current
+filters. Within each kind, cards are ordered by descriptive difference rather than an evidence
+or injury-severity score. Every card carries what differs, its magnitude, the comparison
+baseline, and the sample size behind it.
 
-![Signals: a ranked feed of tier-tagged finding cards, each showing the compared values, how far past its qualifying threshold the finding reached, the comparison baseline, and its supporting sample-case count](docs/screenshots/08-signals-desktop.png)
+![Signals: findings grouped by kind, each showing compared values, the current-filter comparison baseline, and its supporting sample-case count](docs/screenshots/08-signals-desktop.png)
 
-![Signals on a 390px phone screen: the three-column card feed collapses to a single column with tier tags and figures unchanged](docs/screenshots/08-signals-mobile.png)
+![Signals on a 390px phone screen: grouped findings reflow into a single column with comparison baselines and sample counts intact](docs/screenshots/08-signals-mobile.png)
 
 ### 9. Methodology & Data
 

@@ -203,9 +203,9 @@ def build_region_tool_matrix(
 
             if cell is None or state == "suppressed" or value is None:
                 z_row.append(None)
-                text_row.append(marks.EM_DASH)
-                estimate_text = marks.EM_DASH
-                share_text = marks.EM_DASH
+                text_row.append(marks.NOT_REPORTABLE_SHORT)
+                estimate_text = marks.NOT_REPORTABLE
+                share_text = marks.NOT_REPORTABLE
                 suppressed_cells += 1
             else:
                 # The COLOUR is capped; the number never is.
@@ -224,7 +224,7 @@ def build_region_tool_matrix(
             ci_text = (
                 f"{marks.fmt_share(ci_low)}–{marks.fmt_share(ci_high)}"
                 if ci_low is not None and ci_high is not None
-                else marks.EM_DASH
+                else marks.NOT_REPORTABLE
             )
             state_label = _STATE_LABEL.get(state, SUPPRESSED_LABEL)
             cd_row.append(

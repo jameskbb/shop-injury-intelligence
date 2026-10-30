@@ -120,17 +120,17 @@ def test_fingerprint_ratio_column_uses_log2_ratio_capped():
     assert fig.data[1].z[0][0] == 1.0  # 0.20 / 0.10 = 2x -> log2(2) = 1.0
 
 
-def test_fingerprint_suppressed_cell_has_no_fill_and_reads_as_a_dash():
+def test_fingerprint_suppressed_cell_has_no_fill_and_reads_as_not_reportable():
     dims = (
         _dim("burden", "Burden", None, {}),
         _dim("escalated_care", "Escalated care", 0.10, {}),
     )
     fig = heatmap.build_fingerprint(dims, ("table_saw",), _TOOL_LABELS)
-    # The burden bar: no fill at all, and its lettered value is a dash.
+    # The burden bar: no fill at all, and its lettered value is not reportable.
     assert list(fig.data[0].marker.color) == ["rgba(0,0,0,0)"]
-    assert "—" in list(fig.data[0].text)[0]
+    assert "N/R" in list(fig.data[0].text)[0]
     assert fig.data[1].z[0][0] is None
-    assert fig.data[1].text[0][0] == "—"
+    assert fig.data[1].text[0][0] == "N/R"
 
 
 def test_fingerprint_limited_cell_keeps_its_value_under_a_dashed_outline():
@@ -339,7 +339,7 @@ def test_share_matrix_suppressed_and_limited_cells():
     )
     fig = heatmap.build_share_matrix(df, ["laceration", "amputation"], drop_empty_categories=False)
     assert fig.data[0].z[0][0] is None
-    assert fig.data[0].text[0][0] == "—"
+    assert fig.data[0].text[0][0] == "N/R"
     assert fig.data[0].customdata[0][0][3] == SUPPRESSED_LABEL
     assert fig.data[0].z[0][1] == 0.2
     # Line treatment, not a text suffix: the cell keeps its number and gains a dashed outline.

@@ -44,46 +44,8 @@ mechanism_trend_min_years: 3
 # Number of top STABLE, non-unknown/non-other mechanisms plotted as separate trend lines.
 mechanism_trend_top_n: 5
 
-# ---------------------------------------------------------------------------
-# SIGNALS page (src/wii/app/pages/signals.py): the cross-cutting ranked feed of the strongest
-# findings the INS-01 engine produces across ALL tools, plus the significance tier shown on each
-# card. Nothing below is repeated as a literal in the page module -- the page reads this block
-# the same way `wii.analytics.mechanism_trend.load_trend_gate` reads its own `mechanism_trend_*`
-# keys, and `load_thresholds` ignores it (it only reads the `Thresholds` field names).
-#
-# TIERS. A finding's tier is NOT its raw effect size: effect sizes are not comparable across the
-# five insight kinds (a `trend` effect size is a percent change, a share/burden effect size is a
-# ratio). The page normalizes each finding to its "threshold multiple" -- the finding's own
-# effect size divided by the gate its kind had to clear (`share_ratio_min`,
-# `burden_outcome_ratio_min` or `trend_pct_min` above) -- so a tier means the same thing for
-# every kind: "this finding cleared its own qualifying threshold by N times". Every qualifying
-# finding therefore has a multiple of at least 1.0, and a tier additionally requires a supporting
-# sample-case count, so a large effect measured on a handful of cases is never promoted.
-# ---------------------------------------------------------------------------
+# Signals uses the engine's within-kind ordering and takes turns across kinds for its cap.
+# No cross-kind strength or significance score is assigned.
 signals:
-  # How many ranked candidates the page pulls from the engine before re-ranking them by threshold
-  # multiple and tiering them. Comfortably above the number of tool x dimension comparisons that
-  # can clear the gates at once, so the feed is a re-ranking of ALL qualifying findings rather
-  # than a re-ranking of the engine's own top `max_cards`.
   candidate_pool: 200
-  # Cards shown in the feed. Larger than `max_cards` above (which shapes a SECTION on another
-  # page) because this page is the feed, but still bounded so the page stays readable.
   max_cards: 12
-  # Ordered strongest-first; the first rule a finding satisfies wins. `min_strength` is the
-  # threshold multiple described above; `min_raw_n` is the finding's own supporting sample-case
-  # count, expressed as a multiple of `min_raw_n: 50` (4x for the top tier, 2x for the middle).
-  # Tier names are DISPLAY strings and are written in sentence case here, at the source, rather
-  # than upper-cased in CSS: a tracked-out all-caps eyebrow repeated above fifteen cards is the
-  # commonest tell of a generated page, and caps in the data would still reach a screen reader
-  # and the guardrail scanner as caps. The page's own strength bar carries rank far more
-  # precisely than a two-level word ever did.
-  tiers:
-    - name: High impact
-      min_strength: 2.0
-      min_raw_n: 200
-    - name: Notable
-      min_strength: 1.5
-      min_raw_n: 100
-  # Every finding that cleared the engine's gates but neither tier rule above. These are real,
-  # fully-gated findings, so they are shown -- just not promoted.
-  base_tier: Moderate

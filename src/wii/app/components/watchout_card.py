@@ -30,12 +30,13 @@ NO_THRESHOLD_COPY = (
     "distinctive pattern rather than a weak one."
 )
 _MECHANISM_SUFFIX = " (narrative-derived)"
-_SUPPRESSED_VALUE_HTML = f"— · {html.escape(SUPPRESSED_LABEL)}"
+_SUPPRESSED_VALUE_HTML = f"Not reportable · {html.escape(SUPPRESSED_LABEL)}"
 
 
 def _category_value_html(cell: CategoryCell | None, suffix: str = "") -> str:
     """ "{label}{suffix} · {share}" for a stable/limited cell (LIMITED_SAMPLE_LABEL appended when
-    limited); "— · {SUPPRESSED_LABEL}" for a missing/suppressed cell -- shared by the "Primary
+    limited); "Not reportable · {SUPPRESSED_LABEL}" for a missing/suppressed cell -- shared by the
+    "Primary
     body region" and "Common mechanism" fields."""
     if cell is None or cell.value is None or cell.state not in (STATE_STABLE, STATE_LIMITED):
         return _SUPPRESSED_VALUE_HTML
@@ -47,7 +48,8 @@ def _category_value_html(cell: CategoryCell | None, suffix: str = "") -> str:
 
 def _distinctive_value_html(w: Watchout) -> str:
     """ "{distinctive_label} · {tool share} vs {workshop baseline share}", read from the
-    `Insight.numbers` tuple `_share_vs_baseline` built (D-03) -- "—" plus SUPPRESSED_LABEL when
+    `Insight.numbers` tuple `_share_vs_baseline` built (D-03) -- "Not reportable" plus
+    SUPPRESSED_LABEL when
     this tool has no qualifying distinctive-injury comparison."""
     if w.distinctive is None or w.distinctive_label is None:
         return _SUPPRESSED_VALUE_HTML
@@ -75,7 +77,8 @@ def _field_row(label: str, value_html: str) -> str:
 
 
 #: Printed ONCE when a card has no field that clears the floor. The Sander card used to repeat
-#: "— · Estimate suppressed – insufficient statistical stability" on three consecutive rows: the
+#: "Not reportable · Estimate suppressed – insufficient statistical stability" on three consecutive
+#: rows: the
 #: same sentence three times is not three disclosures, it is one disclosure shouted. The state is
 #: still stated in full, once, and no field is silently blanked.
 ALL_SUPPRESSED_COPY = (
@@ -98,7 +101,7 @@ def watchout_card_html(w: Watchout) -> str:
     row carrying `NO_THRESHOLD_COPY` verbatim (no filler) -- "Common mechanism" always renders on
     its own row regardless. When NO field clears, the whole body collapses to
     `ALL_SUPPRESSED_COPY`, stated once. Every interpolated value is `html.escape`'d; a card whose
-    fields individually lack stable data still renders every row, each showing "—" plus
+    fields individually lack stable data still renders every row, each showing "Not reportable" plus
     `SUPPRESSED_LABEL` for that field alone."""
     title = html.escape(w.tool_label)
     if _all_fields_suppressed(w):

@@ -85,7 +85,7 @@ class ResolvedEstimate:
 
     state: str  # STATE_STABLE | STATE_LIMITED | STATE_SUPPRESSED
     value: float | None  # None only when suppressed
-    display_value: str  # "—" when suppressed
+    display_value: str  # "Not reportable" when suppressed
     label: str  # "" when stable, else SUPPRESSED_LABEL / LIMITED_SAMPLE_LABEL
     raw_n: int
     ci_low: float | None
@@ -134,7 +134,7 @@ def _finish(state: str, value: float | None, raw_n: int, ci_low, ci_high, fmt) -
         return ResolvedEstimate(
             state=state,
             value=None,
-            display_value="—",
+            display_value="Not reportable",
             label=SUPPRESSED_LABEL,
             raw_n=raw_n,
             ci_low=None,
@@ -193,7 +193,7 @@ def resolve_aggregate(value: float, raw_n: int) -> ResolvedEstimate:
         return ResolvedEstimate(
             state=STATE_SUPPRESSED,
             value=None,
-            display_value="—",
+            display_value="Not reportable",
             label=SUPPRESSED_LABEL,
             raw_n=raw_n,
             ci_low=None,
@@ -210,11 +210,11 @@ def resolve_aggregate(value: float, raw_n: int) -> ResolvedEstimate:
     )
 
 
-#: A share that formats to this under a non-stable label renders "—" instead. "0.0% (Limited
-#: sample)" beside a real injury count reads as a contradiction rather than as a small number:
-#: the digits claim a measured zero that the label simultaneously withdraws. The dash loses
-#: nothing -- the stability label and the raw-N line still say a value exists and is not
-#: reportable, which is the honest reading.
+#: A share that formats to this under a non-stable label renders "Not reportable" instead.
+#: "0.0% (Limited sample)" beside a real injury count reads as a contradiction rather than as a
+#: small number. The digits claim a measured zero that the label simultaneously withdraws.
+#: The text loses nothing: the stability label and the raw-N line still say a value exists and
+#: is not reportable, which is the honest reading.
 ZERO_SHARE_DISPLAY = "0.0%"
 
 
@@ -222,8 +222,8 @@ def resolve_share(row: Any) -> ResolvedEstimate:
     """Same resolver for `agg_tool_severity`/`share_by` rows (share, share_ci_low/high, stable,
     suppression_reason) -- shares have no separate period/annual basis.
 
-    A non-stable share that formats to `ZERO_SHARE_DISPLAY` renders "—" instead of the digits:
-    see that constant.
+    A non-stable share that formats to `ZERO_SHARE_DISPLAY` renders "Not reportable"
+    instead of the digits: see that constant.
     """
     value = _get(row, "share")
     ci_low = _get(row, "share_ci_low")
@@ -237,7 +237,7 @@ def resolve_share(row: Any) -> ResolvedEstimate:
     state = _classify(stable, reasons)
     resolved = _finish(state, value, raw_n, ci_low, ci_high, format_share)
     if state != STATE_STABLE and resolved.display_value == ZERO_SHARE_DISPLAY:
-        return replace(resolved, display_value="—")
+        return replace(resolved, display_value="Not reportable")
     return resolved
 
 

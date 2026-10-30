@@ -253,7 +253,7 @@ def test_ranked_bars_mark_limited_rows_without_a_caution_hatch():
     assert CAUTION not in fills
 
 
-def test_ranked_bars_suppressed_row_shows_dash_and_zero_length_bar():
+def test_ranked_bars_suppressed_row_shows_not_reportable_and_zero_length_bar():
     df = _ranked_bars_df()
     fig = build_ranked_bars(df, "period_total", "Estimated injuries")
     labels = list(fig.data[0].y)
@@ -261,7 +261,7 @@ def test_ranked_bars_suppressed_row_shows_dash_and_zero_length_bar():
     texts = list(fig.data[0].text)
     suppressed_idx = labels.index("Lathe")
     assert values[suppressed_idx] == 0.0
-    assert texts[suppressed_idx] == "—"
+    assert texts[suppressed_idx] == "Not reportable"
 
 
 def test_ranked_bars_error_x_from_basis_matched_ci():
@@ -282,7 +282,8 @@ def test_ranked_bars_label_with_slash_and_paren_unmodified():
 
 def test_ranked_bars_print_values_past_the_whisker_end():
     """Every non-suppressed bar gets its value, placed at value + upper CI so the number never
-    sits on the interval line, and suppressed rows get no number (their "—" is on the bar trace)."""
+    sits on the interval line, and suppressed rows get no number
+    (their "Not reportable" is on the bar trace)."""
     fig = build_ranked_bars(_ranked_bars_df(), "period_total", "Estimated injuries")
     bars, labels_trace = fig.data[0], fig.data[1]
     assert labels_trace.mode == "text"
@@ -387,8 +388,8 @@ def test_overview_prints_a_line_instead_of_an_all_suppressed_ranked_chart(monkey
 
     The builder refuses for a real reason: every bar is zero-length, so Plotly autoranges the
     value axis to [-1, 1] and the `~s` tick format prints SI milli-units ("-500m ... 500m") beside
-    a column of em dashes. Overview reaches this case more easily than any other page because it
-    drops suppressed rows off the axis first, so a narrow enough filter empties the frame
+    a column of suppressed values. Overview reaches this case more easily than any other page
+    because it drops suppressed rows off the axis first, so a narrow enough filter empties the frame
     entirely.
     """
     from wii.app.charts.ranked_bars import all_suppressed_note, build_ranked_bars

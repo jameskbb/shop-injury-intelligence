@@ -43,7 +43,9 @@ def _rv(label, value, state, raw_n, display=None):
     return RegionValue(
         label=label,
         value=value,
-        display_value=display if display is not None else ("—" if value is None else f"{value}"),
+        display_value=display
+        if display is not None
+        else ("Not reportable" if value is None else f"{value}"),
         state=state,
         raw_n=raw_n,
     )
