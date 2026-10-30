@@ -136,8 +136,9 @@ uv run --locked streamlit run app.py
 
 The committed processed data are ready to serve: no raw downloads, database server, or API keys
 are needed. The [live app](https://shop-injury-intelligence.streamlit.app/) runs on Streamlit
-Community Cloud and redeploys on every push to `main`. See [deployment instructions](docs/deployment.md)
-for the hosted setup, a self-hosted start command, health check, and browser smoke checks.
+Community Cloud from `main`; reboot it after pushing code or data changes. See
+[deployment instructions](docs/deployment.md) for the hosted setup, a self-hosted start command,
+health check, and browser smoke checks.
 
 ## Refreshing data
 

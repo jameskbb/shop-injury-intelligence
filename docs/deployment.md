@@ -14,10 +14,15 @@ changing the version later means deleting and redeploying the app. No secrets ar
 
 - **Dependencies.** Community Cloud reads `uv.lock` first and installs the locked set plus this
   project, so `app.py` can import the `wii` package. Keep `uv.lock` committed and current.
-- **Updates.** Every push to `main` redeploys within a minute or two and restarts the process,
-  which clears the app's caches. Code, data, and dependency changes all ship this way.
+- **Updates.** A push to `main` updates the running app's files within a minute or two, and the
+  next page load runs the new page code. Modules already imported, the shared DuckDB database,
+  and cached query results stay in memory until the process restarts, so mixed old and new code
+  can fail (for example an `ImportError` for a name the push added). After any push that changes
+  `src/` or `data/`, open "Manage app" on the live app, choose Reboot app, then reload. A change
+  to `uv.lock` reinstalls dependencies and restarts the process on its own.
 - **Data refreshes.** The monthly refresh workflow opens a pull request when CPSC publishes a new
-  year. Merging that pull request is the release; run CI on its branch first (see below).
+  year. Merging that pull request is the release; run CI on its branch first, then reboot the app
+  so it reads the new Parquet files.
 - **Idle sleep.** An app with no visitors for 12 hours sleeps and wakes on the next visit.
 - **Sharing.** Who may view the app is set in the app's Settings, under Sharing.
 - **Logs.** Use "Manage app" in the lower right of the live app; tracebacks there are full,
