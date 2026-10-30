@@ -181,8 +181,9 @@ button, input, select, textarea, [role="option"], [role="combobox"],
 [data-testid="stDecoration"] {{ display: none; }}
 body {{ overflow-x: hidden; }}
 img, svg {{ max-width: 100%; height: auto; }}
+/* Clear Streamlit's fixed 60px header: hosted deployments paint it opaque over the title. */
 [data-testid="stMainBlockContainer"] {{
-  padding-top: var(--wii-space-xl);
+  padding-top: 80px;
   padding-bottom: var(--wii-space-3xl);
 }}
 [data-testid="stMain"] [data-testid="stVerticalBlock"] {{ gap: 12px; }}

@@ -1,6 +1,6 @@
 """D-02/APP-05 cached data layer: the only module that touches `wii.metrics` or agg-table SQL.
 
-`st.cache_resource` holds the one process-wide DuckDB connection; `st.cache_data` wraps every
+`st.cache_resource` holds the one process-wide DuckDB database; `st.cache_data` wraps every
 query, keyed on the frozen `CaseFilter` tuple (Wave-0 spike A3: confirmed hashable). The default
 view (no active sidebar filter) reads the committed `agg_overall_year` table; any non-default
 filter falls through to the `wii.metrics` query path via `cached_estimate_total`. The app imports
@@ -49,9 +49,17 @@ _DEFAULT_AGE_SCOPE = "adults"
 
 
 @st.cache_resource
-def get_connection():
-    """One process-wide DuckDB connection over the committed processed Parquet (D-02)."""
+def _base_connection():
+    """One process-wide DuckDB database over the committed processed Parquet (D-02)."""
     return connect()
+
+
+def get_connection():
+    """A fresh cursor on the shared database for each caller. Streamlit runs every session on
+    its own thread, and one DuckDB connection is not safe for concurrent queries: sharing it let
+    simultaneous page loads read each other's results. A cursor is a separate connection to the
+    same in-memory database, so it sees the registered views at negligible cost."""
+    return _base_connection().cursor()
 
 
 @st.cache_data(ttl=None)
