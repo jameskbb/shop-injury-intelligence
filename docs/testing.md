@@ -34,6 +34,17 @@ uv run pytest -m realdata -q
 Before a deployment, also follow the [deployment smoke checklist](deployment.md#browser-smoke-checklist).
 HTTP health and automated tests do not verify the hosted browser session, proxy, or WebGL behavior.
 
+## Screenshots
+
+A change to a page's interface re-shoots its captures in the same change, so the README gallery
+never shows a screen that no longer exists. Re-render the README title card too whenever the
+product's look or the committed data changes:
+
+```bash
+uv run --with playwright==1.62.0 python scripts/capture_screenshots.py
+uv run --with playwright==1.62.0 python docs/src/render_title_card.py
+```
+
 ## Traceability Table
 
 | Brief TESTING item | Covering tests | Notes |
