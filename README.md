@@ -2,9 +2,13 @@
 
 ![Title card on drafting vellum: the project name, the question "What sends workshop users to the ER?", and a ranked bar of the five tools with the largest estimated annual ER-treated injury burden for adults, 2006 to 2025, led by the bench or table saw](docs/images/readme-title-shop-injury-intelligence.png)
 
-[![Open the live app on Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://shop-injury-intelligence.streamlit.app/)
-[![CI status](https://github.com/jameskbb/shop-injury-intelligence/actions/workflows/ci.yml/badge.svg)](https://github.com/jameskbb/shop-injury-intelligence/actions/workflows/ci.yml)
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<p align="center">
+  <a href="https://github.com/jameskbb/shop-injury-intelligence/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/jameskbb/shop-injury-intelligence/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge"></a>
+  <a href="pyproject.toml"><img alt="Python" src="https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjameskbb%2Fshop-injury-intelligence%2Fmain%2Fpyproject.toml&query=%24.project%5B%27requires-python%27%5D&label=Python&style=for-the-badge&logo=python&logoColor=white&color=3776AB"></a>
+  <a href="pyproject.toml"><img alt="DuckDB" src="https://img.shields.io/badge/DuckDB-query%20engine-FFD500?style=for-the-badge&logo=duckdb&logoColor=black"></a>
+  <a href="https://shop-injury-intelligence.streamlit.app/"><img alt="Live app" src="https://img.shields.io/badge/Live-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white"></a>
+</p>
 
 Workshop Injury Intelligence turns U.S. Consumer Product Safety Commission emergency-department
 data into an interactive view of how workshop tools are associated with injuries, where on the
