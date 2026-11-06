@@ -9,7 +9,10 @@ data/raw/
 data/interim/
 data/reference/
 
-# Local working notes and assistant configuration: never part of the public tree.
+# Local working notes and per-machine assistant state.
 .gsd/
 .planning/
-.claude/
+.claude/settings.local.json
+.claude/worktrees/
+.env*
+!.env.example

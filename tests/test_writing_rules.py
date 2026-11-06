@@ -27,3 +27,10 @@ def test_tracked_text_files_do_not_use_em_dashes():
             if "\u2014" in html.unescape(line)
         )
     assert not violations, "Reword prohibited punctuation in: " + ", ".join(violations)
+
+
+def test_agent_rules_pair_is_identical():
+    root = Path(__file__).resolve().parents[1]
+    claude = (root / "CLAUDE.md").read_bytes()
+    agents = (root / "AGENTS.md").read_bytes()
+    assert claude == agents, "CLAUDE.md and AGENTS.md must be identical"
