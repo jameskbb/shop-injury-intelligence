@@ -252,9 +252,9 @@ Contributors changing a page re-shoot its screenshots in the same change; see
 | Storage | Parquet | The curated tables are 4.4 MB, committed, so the app needs no data setup and no database service. |
 | Query layer | DuckDB 1.5 | Analytical SQL over the Parquet tables, including the survey-weighted variance pass, with no server to run. |
 | Statistics | `scipy` + hand-rolled Taylor linearization | Stratified ultimate-cluster variance from stratum, PSU and weight: a short closed-form formula the project tests directly, rather than a survey-statistics dependency. |
-| Application | Streamlit 1.63 | `st.navigation` routing, `st.cache_data` throughout, and a custom light drafting theme. |
+| Application | Streamlit 1.67 | `st.navigation` routing, `st.cache_data` throughout, and a custom light drafting theme. |
 | Charts | Plotly 6 | Native Sankey and selection events wired through Streamlit. The body map is a Three.js figure (an `st.components.v2` component) with a hand-authored SVG fallback. |
-| Quality | ruff 0.16, pytest 8 | Lint, format and the synthetic suite run on every push and pull request to `main`. |
+| Quality | ruff 0.16, pytest 9 | Lint, format and the synthetic suite run on every push and pull request to `main`. |
 
 Plotly and pandas are pinned below their newest major versions; see
 [`pyproject.toml`](pyproject.toml).

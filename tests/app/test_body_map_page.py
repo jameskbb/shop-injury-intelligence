@@ -405,7 +405,7 @@ def test_body_map_3d_click_selects_and_reclick_clears(app_test, fake_body3d):
     at.run(timeout=APP_TIMEOUT)
     assert not at.exception
     assert at.session_state[region_select.PERSIST_KEY] == "finger"
-    assert at.query_params["region"] == ["finger"]
+    assert at.query_params["region"] == "finger"
     assert any("Showing supporting data for: Finger." in v for v in _captions(at))
     # The page reran after the click, so the figure itself was told about the selection.
     assert fake_body3d.calls[-1][0]["selected"] == "finger"

@@ -208,7 +208,12 @@ def test_peer_findings_invariant_under_display_basis():
             period.stable,
         )
         for field in ("value", "ci_low", "ci_high"):
-            assert getattr(annual, field) == pytest.approx(getattr(period, field), rel=1e-12)
+            expected = getattr(period, field)
+            # Suppressed estimates are None on both bases; pytest 9 approx rejects None.
+            if expected is None:
+                assert getattr(annual, field) is None
+            else:
+                assert getattr(annual, field) == pytest.approx(expected, rel=1e-12)
     results = [
         [
             i

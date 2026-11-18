@@ -4,7 +4,7 @@ version = "0.1.1"
 description = "Workshop Injury Intelligence: CPSC NEISS ingestion, taxonomy, and analytics"
 requires-python = ">=3.13"
 dependencies = [
-    "streamlit~=1.63.0",
+    "streamlit~=1.67.0",
     "duckdb~=1.5.0",
     "polars~=1.44.0",
     "plotly>=6,<7",
@@ -22,7 +22,7 @@ llm = [
 
 [dependency-groups]
 dev = [
-    "pytest>=8.4,<9",
+    "pytest>=9.0.3,<10",
     "ruff~=0.16.0",
 ]
 
